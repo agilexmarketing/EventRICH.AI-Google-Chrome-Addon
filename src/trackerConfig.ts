@@ -998,15 +998,11 @@ export class TrackerDetector {
 	 * Check if a URL matches any tracker detection rules
 	 */
 	static findMatchingRule(url: string): TrackerDetectionRule | null {
-		console.log('EventRICH.AI: Checking URL for matches:', url);
 		for (const rule of TRACKER_DETECTION_RULES) {
-			const isMatch = rule.urlPatterns.some(pattern => url.includes(pattern));
-			if (isMatch) {
-				console.log('EventRICH.AI: URL matched rule:', rule.name, 'patterns:', rule.urlPatterns);
+			if (rule.urlPatterns.some(pattern => url.includes(pattern))) {
 				return rule;
 			}
 		}
-		console.log('EventRICH.AI: No rule matched for URL:', url);
 		return null;
 	}
 

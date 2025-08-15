@@ -30,9 +30,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 const requestCache = new Map<string, { timestamp: number; response: any }>();
 const CACHE_DURATION = 5000; // 5 seconds
 
-// Rate limiting configuration
+// Rate limiting configuration (increased for high-traffic sites)
 const RATE_LIMIT_CONFIG = {
-	maxRequests: 100,
+	maxRequests: 10000, // Much higher limit for modern websites
 	windowMs: 60000, // 1 minute
 	globalKey: 'global_requests'
 };
