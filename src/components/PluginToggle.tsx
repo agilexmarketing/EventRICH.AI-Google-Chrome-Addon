@@ -60,7 +60,7 @@ export const PluginToggle: React.FC<PluginToggleProps> = ({ onToggle, className 
 	if (isLoading) {
 		return (
 			<div className={`flex items-center justify-center ${className}`}>
-				<div className="w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+				<div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
 			</div>
 		);
 	}

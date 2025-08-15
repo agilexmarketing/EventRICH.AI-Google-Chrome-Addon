@@ -10,9 +10,6 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 	const { theme, setTheme } = useTheme();
 
 	const cycleTheme = async () => {
-		console.log('[ThemeToggle] Button clicked! Current theme:', theme);
-		console.log('[ThemeToggle] setTheme function available:', typeof setTheme);
-		
 		let nextTheme: ThemeMode;
 		
 		switch (theme) {
@@ -29,14 +26,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 				nextTheme = ThemeMode.LIGHT;
 		}
 		
-		console.log('[ThemeToggle] Attempting to change to:', nextTheme);
-		
-		try {
-			await setTheme(nextTheme);
-			console.log('[ThemeToggle] Theme change completed successfully');
-		} catch (error) {
-			console.error('[ThemeToggle] Error changing theme:', error);
-		}
+		await setTheme(nextTheme);
 	};
 
 	const getCurrentIcon = () => {
@@ -74,12 +64,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 
 	return (
 		<button
-			onClick={(e) => {
-				console.log('[ThemeToggle] Raw button click detected', e);
-				cycleTheme();
-			}}
-			onMouseDown={() => console.log('[ThemeToggle] Mouse down on button')}
-			onMouseUp={() => console.log('[ThemeToggle] Mouse up on button')}
+			onClick={cycleTheme}
 			className={`
 				flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
 				bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
