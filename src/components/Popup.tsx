@@ -89,52 +89,7 @@ export default function Popup() {
 	const [showDebugPanel, setShowDebugPanel] = useState(false);
 	const [debugDataCopied, setDebugDataCopied] = useState(false);
 
-	// Generate comprehensive debug data
-	const generateDebugData = useCallback(() => {
-		const debugData = {
-			timestamp: new Date().toISOString(),
-			url: currentUrl,
-			summary: {
-				totalTrackers: allTrackers.filter(t => t.id).length,
-				totalEvents: allTrackers.reduce((sum, t) => sum + t.items.length, 0),
-				detectedTrackers: allTrackers.filter(t => t.id).map(t => t.name)
-			},
-			trackers: allTrackers.filter(t => t.id).map(tracker => ({
-				name: tracker.name,
-				id: tracker.id,
-				nameID: tracker.nameID,
-				eventCount: tracker.items.length,
-				events: tracker.items.map(event => ({
-					name: event.name,
-					url: event.url,
-					timestamp: event.timestamp?.toISOString(),
-					parameters: event.parameters.reduce((acc, category) => {
-						category.items.forEach(item => {
-							acc[item.name] = item.value;
-						});
-						return acc;
-					}, {} as Record<string, string>)
-				}))
-			})),
-			metadata: {
-				extensionVersion: "2.1.0",
-				userAgent: navigator.userAgent,
-				generatedAt: new Date().toISOString()
-			}
-		};
-		return debugData;
-	}, [allTrackers, currentUrl]);
 
-	const handleCopyDebugData = async () => {
-		try {
-			const debugData = generateDebugData();
-			await navigator.clipboard.writeText(JSON.stringify(debugData, null, 2));
-			setDebugDataCopied(true);
-			setTimeout(() => setDebugDataCopied(false), 2000);
-		} catch (error) {
-			console.error('Failed to copy debug data:', error);
-		}
-	};
 
 	// Helper functions for tab-specific storage
 	const getTabKey = (eventType: string, tabId: number) => `${eventType}_tab_${tabId}`;
@@ -428,6 +383,53 @@ export default function Popup() {
 		filteredGoogleTagManager,
 		...filteredOtherTrackers
 	];
+
+	// Generate comprehensive debug data
+	const generateDebugData = useCallback(() => {
+		const debugData = {
+			timestamp: new Date().toISOString(),
+			url: currentUrl,
+			summary: {
+				totalTrackers: allTrackers.filter(t => t.id).length,
+				totalEvents: allTrackers.reduce((sum, t) => sum + t.items.length, 0),
+				detectedTrackers: allTrackers.filter(t => t.id).map(t => t.name)
+			},
+			trackers: allTrackers.filter(t => t.id).map(tracker => ({
+				name: tracker.name,
+				id: tracker.id,
+				nameID: tracker.nameID,
+				eventCount: tracker.items.length,
+				events: tracker.items.map(event => ({
+					name: event.name,
+					url: event.url,
+					timestamp: event.timestamp?.toISOString(),
+					parameters: event.parameters.reduce((acc, category) => {
+						category.items.forEach(item => {
+							acc[item.name] = item.value;
+						});
+						return acc;
+					}, {} as Record<string, string>)
+				}))
+			})),
+			metadata: {
+				extensionVersion: "2.1.0",
+				userAgent: navigator.userAgent,
+				generatedAt: new Date().toISOString()
+			}
+		};
+		return debugData;
+	}, [allTrackers, currentUrl]);
+
+	const handleCopyDebugData = async () => {
+		try {
+			const debugData = generateDebugData();
+			await navigator.clipboard.writeText(JSON.stringify(debugData, null, 2));
+			setDebugDataCopied(true);
+			setTimeout(() => setDebugDataCopied(false), 2000);
+		} catch (error) {
+			console.error('Failed to copy debug data:', error);
+		}
+	};
 
 	// Keyboard shortcuts
 	useEffect(() => {
