@@ -3,8 +3,8 @@ import path from "node:path";
 import rspack from "@rspack/core";
 
 export default defineConfig({
-	mode: "development", // Enable debug mode
-	devtool: "source-map", // Enable source maps for debugging
+	mode: "production", // Test production mode
+	devtool: false, // Disable source maps (production setting)
 	entry: {
 		popup: "./src/popup.tsx",
 		background: "./src/background.ts",
@@ -24,8 +24,8 @@ export default defineConfig({
 		maxEntrypointSize: 1000000, // 1MB
 	},
 	optimization: {
-		minimize: false, // Disable minification for debugging
-		splitChunks: false, // Disable chunk splitting for simpler debugging
+		minimize: true, // Keep minification for smaller file size
+		splitChunks: false, // Disable chunk splitting for Chrome extension compatibility
 	},
 	resolve: {
 		extensions: [".tsx", ".ts", ".js"],

@@ -1,12 +1,8 @@
-console.log('EventRICH.AI: popup.js bundle starting to execute...');
-
 import { createRoot } from "react-dom/client";
 import "./styles/global.css";
 import Popup from "./components/Popup";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeManager, ErrorHandler, AuditLogger } from "./utils";
-
-console.log('EventRICH.AI: popup.js imports completed...');
 
 // Initialize theme and utilities before mounting
 const initialize = async () => {
@@ -28,16 +24,12 @@ const initialize = async () => {
 		// Mount the React app into the root div
 		const container = document.getElementById("root");
 		if (container) {
-			console.log('EventRICH.AI: Root container found, creating React root...');
 			const root = createRoot(container);
-			console.log('EventRICH.AI: React root created, rendering components...');
-			
 			root.render(
 				<ErrorBoundary>
 					<Popup />
 				</ErrorBoundary>
 			);
-			console.log('EventRICH.AI: React render called');
 		} else {
 			throw new Error('Root container not found');
 		}
@@ -80,28 +72,14 @@ window.addEventListener('error', (event) => {
 	`;
 });
 
-// Initialize the popup with comprehensive error handling
-console.log('EventRICH.AI: Starting popup initialization...');
-try {
-	initialize().then(() => {
-		console.log('EventRICH.AI: Popup initialization completed successfully');
-	}).catch((error) => {
-		console.error('EventRICH.AI: Popup initialization promise rejected:', error);
-		document.body.innerHTML = `
-			<div style="padding: 20px; background: #fee; color: #900; font-family: system-ui;">
-				<h3>Initialization Error</h3>
-				<p><strong>Error:</strong> ${error?.message || 'Unknown initialization error'}</p>
-				<pre style="background: #f0f0f0; padding: 10px; margin-top: 10px; font-size: 12px;">${error?.stack || 'No stack trace'}</pre>
-			</div>
-		`;
-	});
-} catch (syncError) {
-	console.error('EventRICH.AI: Synchronous initialization error:', syncError);
+// Initialize the popup
+initialize().catch((error) => {
+	console.error('EventRICH.AI: Popup initialization failed:', error);
 	document.body.innerHTML = `
 		<div style="padding: 20px; background: #fee; color: #900; font-family: system-ui;">
-			<h3>Synchronous Initialization Error</h3>
-			<p><strong>Error:</strong> ${syncError?.message || 'Unknown sync error'}</p>
-			<pre style="background: #f0f0f0; padding: 10px; margin-top: 10px; font-size: 12px;">${syncError?.stack || 'No stack trace'}</pre>
+			<h3>Initialization Error</h3>
+			<p><strong>Error:</strong> ${error?.message || 'Unknown initialization error'}</p>
+			<pre style="background: #f0f0f0; padding: 10px; margin-top: 10px; font-size: 12px;">${error?.stack || 'No stack trace'}</pre>
 		</div>
 	`;
-}
+});
