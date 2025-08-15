@@ -18,6 +18,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 	}, []);
 
 	const cycleTheme = async () => {
+		console.log('[ThemeToggle] Current theme:', theme);
 		let nextTheme: ThemeMode;
 		
 		switch (theme) {
@@ -34,11 +35,14 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 				nextTheme = ThemeMode.LIGHT;
 		}
 		
+		console.log('[ThemeToggle] Cycling to theme:', nextTheme);
 		setTheme(nextTheme);
 		await ThemeManager.setTheme(nextTheme);
+		console.log('[ThemeToggle] Theme set in storage');
 		
 		// Force immediate theme application
 		ThemeManager.applyTheme(nextTheme);
+		console.log('[ThemeToggle] Theme applied to DOM');
 	};
 
 	const getCurrentIcon = () => {

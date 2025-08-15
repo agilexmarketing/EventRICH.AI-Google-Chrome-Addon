@@ -49,8 +49,10 @@ export class ThemeManager {
 	}
 
 	static async setTheme(theme: ThemeMode): Promise<void> {
+		console.log('[ThemeManager] Setting theme to:', theme);
 		return new Promise((resolve) => {
 			chrome.storage.local.set({ eventrich_theme: theme }, () => {
+				console.log('[ThemeManager] Theme saved to storage');
 				this.applyTheme(theme);
 				resolve();
 			});
@@ -58,18 +60,25 @@ export class ThemeManager {
 	}
 
 	static applyTheme(theme: ThemeMode): void {
+		console.log('[ThemeManager] Applying theme:', theme);
 		const root = document.documentElement;
 		
 		if (theme === ThemeMode.SYSTEM) {
 			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			console.log('[ThemeManager] System theme prefers dark:', prefersDark);
 			theme = prefersDark ? ThemeMode.DARK : ThemeMode.LIGHT;
 		}
+		
+		console.log('[ThemeManager] Final theme to apply:', theme);
+		console.log('[ThemeManager] Root element classes before:', root.className);
 		
 		if (theme === ThemeMode.DARK) {
 			root.classList.add('dark');
 		} else {
 			root.classList.remove('dark');
 		}
+		
+		console.log('[ThemeManager] Root element classes after:', root.className);
 	}
 
 	static async initializeTheme(): Promise<void> {
