@@ -38,7 +38,7 @@ export default function FilterPanel({
 	);
 
 	return (
-		<div className={`border-b border-gray-200 dark:border-gray-700 ${className}`}>
+		<div className={`border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 ${className}`}>
 			{/* Search Bar - Always Visible */}
 			<div className="p-3">
 				<div className="relative">
@@ -89,7 +89,7 @@ export default function FilterPanel({
 
 			{/* Advanced Filters - Collapsible */}
 			{isExpanded && (
-				<div className="px-3 pb-3 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-3">
+				<div className="px-3 pb-3 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-3 bg-gray-50 dark:bg-gray-800">
 					{/* Tracker Filter */}
 					<div>
 						<label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

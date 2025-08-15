@@ -900,7 +900,7 @@ export default function Popup() {
 				</div>
 
 				{/* Main Content - Blurred when disabled */}
-				<div className={`${!isPluginEnabled ? 'blur-sm pointer-events-none' : ''}`}>
+				<div className={`bg-white dark:bg-gray-900 ${!isPluginEnabled ? 'blur-sm pointer-events-none' : ''}`}>
 					{/* Filters Panel */}
 					{showFilters && (
 						<FilterPanel
@@ -1056,7 +1056,7 @@ export default function Popup() {
 
 				{/* Main Content - Dynamic Height */}
 				<div className={`
-					flex flex-col overflow-y-auto
+					flex flex-col overflow-y-auto bg-white dark:bg-gray-900
 					${hasAnyEvents ? 'max-h-[400px]' : 'min-h-32'}
 				`}>
 					{/* Function to get consistent background color based on tracker name */}
