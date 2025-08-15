@@ -745,9 +745,30 @@ export default function Popup() {
 		filteredGoogleTagManager.id || 
 		filteredOtherTrackers.some(t => t.id);
 
+	// Helper function to determine container classes based on tracker count
+	const getContainerClasses = () => {
+		const totalTrackers = [
+			filteredEventRichPixel.id ? 1 : 0,
+			filteredGoogleAnalytics.id ? 1 : 0,
+			filteredGoogleAds.id ? 1 : 0,
+			filteredMeta.id ? 1 : 0,
+			filteredTikTok.id ? 1 : 0,
+			filteredGoogleTagManager.id ? 1 : 0,
+			...filteredOtherTrackers.filter(t => t.id).map(() => 1)
+		].reduce((sum, count) => sum + count, 0);
+
+		if (totalTrackers === 0) {
+			return "popup-container no-events-container";
+		} else if (totalTrackers <= 3) {
+			return "popup-container few-events-container";
+		} else {
+			return "popup-container many-events-container";
+		}
+	};
+
 	return (
 		<ErrorBoundary>
-			<div className="w-[450px] flex flex-col bg-white dark:bg-gray-900 relative">
+			<div className={`w-[450px] flex flex-col bg-white dark:bg-gray-900 relative ${getContainerClasses()}`}>
 				<NotificationCenter />
 				
 				{/* Plugin Disabled Overlay */}
@@ -1031,8 +1052,11 @@ export default function Popup() {
 					</div>
 				)}
 
-				{/* Main Content */}
-				<div className="flex flex-col max-h-[400px] overflow-y-auto">
+				{/* Main Content - Dynamic Height */}
+				<div className={`
+					flex flex-col overflow-y-auto
+					${hasAnyEvents ? 'max-h-[400px]' : 'min-h-32'}
+				`}>
 					{/* Function to get consistent background color based on tracker name */}
 					{(() => {
 						const getTrackerBackgroundColor = (trackerName: string) => {
@@ -1099,6 +1123,17 @@ export default function Popup() {
 							>
 								Clear filters
 							</button>
+						</div>
+					)}
+					
+					{/* No Events Detected Message */}
+					{!hasAnyEvents && !isLoading && (
+						<div className="text-center py-6 text-gray-500 dark:text-gray-400">
+							<Eye className="h-6 w-6 mx-auto mb-2 opacity-50" />
+							<p className="text-sm">No tracking events detected</p>
+							<p className="text-xs mt-1 opacity-75">
+								Visit a website with tracking to see events
+							</p>
 						</div>
 					)}
 				</div>

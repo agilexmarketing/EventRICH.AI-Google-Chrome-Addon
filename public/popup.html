@@ -8,14 +8,42 @@
     <style>
       html, body {
         min-width: 380px;
-        min-height: 500px;
+        min-height: 200px;
+        max-height: 600px;
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        overflow-y: auto;
       }
       #root {
         min-width: 380px;
-        min-height: 500px;
+        min-height: 200px;
+        max-height: 600px;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Ensure popup resizes based on content */
+      .popup-container {
+        min-height: fit-content;
+        max-height: 580px;
+        overflow-y: auto;
+      }
+      
+      /* No events state - smaller height */
+      .no-events-container {
+        min-height: 250px;
+      }
+      
+      /* Few events state - medium height */
+      .few-events-container {
+        min-height: 300px;
+      }
+      
+      /* Many events state - allow scrolling */
+      .many-events-container {
+        min-height: 400px;
+        max-height: 580px;
       }
     </style>
   </head>
