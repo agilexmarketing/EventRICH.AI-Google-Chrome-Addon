@@ -1,0 +1,49 @@
+{
+	"manifest_version": 3,
+	"name": "EventRICH.AI Tracker & Conversion Inspector",
+	"description": "Real-time analytics & pixel debugger for marketers and developers. Track EventRICH.AI, Google Analytics, Meta, TikTok and other tracking pixels with detailed event analysis.",
+	"version": "2.1.0",
+	"icons": {
+		"16": "favicon-16x16.png",
+		"32": "favicon-32x32.png",
+		"48": "favicon-32x32.png",
+		"128": "mstile-150x150.png"
+	},
+	"action": {
+		"default_title": "EventRICH.AI Tracker & Conversion Inspector",
+		"default_icon": "favicon-32x32.png",
+		"default_popup": "popup.html"
+	},
+	"host_permissions": ["*://*/*"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"permissions": ["webRequest", "storage", "activeTab", "webNavigation", "windows", "downloads"],
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content.js"]
+		}
+	],
+	"content_security_policy": {
+		"extension_pages": "script-src 'self'; object-src 'self'; frame-ancestors 'none';"
+	},
+	"privacy_policy": "https://eventrich.ai/privacy-policy",
+	"homepage_url": "https://eventrich.ai",
+	"commands": {
+		"toggle_popup": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+E",
+				"mac": "Command+Shift+E"
+			},
+			"description": "Toggle EventRICH.AI popup"
+		},
+		"export_data": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+X",
+				"mac": "Command+Shift+X"
+			},
+			"description": "Export tracking data"
+		}
+	}
+}

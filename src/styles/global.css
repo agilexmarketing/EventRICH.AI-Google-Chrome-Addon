@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	/* EventRICH.AI Color Palette */
+	--background: 0 0% 100%;
+	--mainText: 222.2 84% 4.9%;
+	--bodyText: 215.4 16.3% 46.9%;
+	--primary: 221.2 83.2% 53.3%;
+	--primary-dark: 221.2 83.2% 43.3%;
+	--primary-light: 217.2 91.2% 59.8%;
+	--card: 0 0% 100%;
+	--topSideMenu: 210 40% 96.1%;
+	--lightBodyColor: 215.4 16.3% 46.9%;
+	--borderColor: 214.3 31.8% 91.4%;
+	--mainTextUnchanged: 0 0% 98%;
+	--listText: 215.4 16.3% 46.9%;
+	--tableColorGray: 210 24% 98%;
+	--customGray: 0 0% 85%;
+	--borderLight: 214.3 31.8% 91.4%;
+	--royalBlueHover: 221.2 83.2% 53.3%;
+	--gray: 215.4 16.3% 46.9%;
+	--orange: 7 80% 60%;
+	--borderOrange: 7 80% 60% 0.25;
+	--green: 163 91% 35%;
+	--borderGreen: 163 91% 35% 0.25;
+	--outlineColor: 0 0% 98% 0.1;
+	--modalBackground: 0 0% 100% 0.25;
+	--royalBlueHover2: 221.2 83.2% 53.3% 0.25;
+	--primary2: 221.2 83.2% 53.3%;
+	--accent: 210 40% 96.1%;
+	--borderSuperLight: 215 54% 49% 0.06;
+	--success: 163 94% 24%;
+	--successLight: 163 94% 24% 0.1;
+}
+
+/* Dark mode colors */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: 222.2 84% 4.9%;
+		--mainText: 210 40% 98%;
+		--bodyText: 215.4 16.3% 46.9%;
+		--primary: 217.2 91.2% 59.8%;
+		--primary-dark: 221.2 83.2% 53.3%;
+		--primary-light: 217.2 91.2% 59.8%;
+		--card: 222.2 84% 4.9%;
+		--topSideMenu: 217.2 32.6% 17.5%;
+		--lightBodyColor: 215.4 16.3% 46.9%;
+		--borderColor: 217.2 32.6% 17.5%;
+		--mainTextUnchanged: 210 40% 98%;
+		--listText: 215.4 16.3% 46.9%;
+		--tableColorGray: 217.2 32.6% 17.5%;
+		--customGray: 215.4 16.3% 46.9%;
+		--borderLight: 217.2 32.6% 17.5%;
+		--royalBlueHover: 217.2 91.2% 59.8%;
+		--gray: 215.4 16.3% 46.9%;
+		--orange: 7 80% 60%;
+		--borderOrange: 7 80% 60% 0.25;
+		--green: 163 91% 35%;
+		--borderGreen: 163 91% 35% 0.25;
+		--outlineColor: 210 40% 98% 0.1;
+		--modalBackground: 222.2 84% 4.9% 0.25;
+		--royalBlueHover2: 217.2 91.2% 59.8% 0.25;
+		--primary2: 217.2 91.2% 59.8%;
+		--accent: 217.2 32.6% 17.5%;
+		--borderSuperLight: 215 54% 49% 0.06;
+		--success: 163 94% 24%;
+		--successLight: 163 94% 24% 0.1;
+	}
+}
+
+/* Custom global styles */
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-family: "Inter", sans-serif;
+	background-color: hsl(var(--card));
+	color: hsl(var(--bodyText));
+}
+
+/* Styles for scrollbar */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: hsl(var(--primary)) white;
+
+	/* width */
+	::-webkit-scrollbar {
+		width: 2px;
+		height: 2px;
+	}
+
+	/* Track */
+	::-webkit-scrollbar-track {
+		background: #fff;
+	}
+
+	/* Handle */
+	::-webkit-scrollbar-thumb {
+		background: hsl(var(--primary));
+	}
+
+	/* Handle on hover */
+	::-webkit-scrollbar-thumb:hover {
+		background: hsl(var(--primary));
+	}
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+	* {
+		scrollbar-color: hsl(var(--primary)) hsl(var(--card));
+
+		::-webkit-scrollbar-track {
+			background: hsl(var(--card));
+		}
+	}
+}
