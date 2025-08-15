@@ -1,4 +1,4 @@
-import { Eye, Settings, Search, BarChart3 } from "lucide-react";
+import { Eye, Settings, Search, BarChart3, Code, Copy, Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { 
 	CURRENT_URL, 
@@ -86,6 +86,55 @@ export default function Popup() {
 	const [otherTrackers, setOtherTrackers] = useState<SygnalDataItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [showFilters, setShowFilters] = useState(false);
+	const [showDebugPanel, setShowDebugPanel] = useState(false);
+	const [debugDataCopied, setDebugDataCopied] = useState(false);
+
+	// Generate comprehensive debug data
+	const generateDebugData = useCallback(() => {
+		const debugData = {
+			timestamp: new Date().toISOString(),
+			url: currentUrl,
+			summary: {
+				totalTrackers: allTrackers.filter(t => t.id).length,
+				totalEvents: allTrackers.reduce((sum, t) => sum + t.items.length, 0),
+				detectedTrackers: allTrackers.filter(t => t.id).map(t => t.name)
+			},
+			trackers: allTrackers.filter(t => t.id).map(tracker => ({
+				name: tracker.name,
+				id: tracker.id,
+				nameID: tracker.nameID,
+				eventCount: tracker.items.length,
+				events: tracker.items.map(event => ({
+					name: event.name,
+					url: event.url,
+					timestamp: event.timestamp?.toISOString(),
+					parameters: event.parameters.reduce((acc, category) => {
+						category.items.forEach(item => {
+							acc[item.name] = item.value;
+						});
+						return acc;
+					}, {} as Record<string, string>)
+				}))
+			})),
+			metadata: {
+				extensionVersion: "2.1.0",
+				userAgent: navigator.userAgent,
+				generatedAt: new Date().toISOString()
+			}
+		};
+		return debugData;
+	}, [allTrackers, currentUrl]);
+
+	const handleCopyDebugData = async () => {
+		try {
+			const debugData = generateDebugData();
+			await navigator.clipboard.writeText(JSON.stringify(debugData, null, 2));
+			setDebugDataCopied(true);
+			setTimeout(() => setDebugDataCopied(false), 2000);
+		} catch (error) {
+			console.error('Failed to copy debug data:', error);
+		}
+	};
 
 	// Helper functions for tab-specific storage
 	const getTabKey = (eventType: string, tabId: number) => `${eventType}_tab_${tabId}`;
@@ -478,6 +527,20 @@ export default function Popup() {
 									<span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-2 h-2 rounded-full"></span>
 								)}
 							</button>
+							<button
+								onClick={() => setShowDebugPanel(!showDebugPanel)}
+								className={`
+									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									border border-gray-200 dark:border-gray-600
+									${showDebugPanel 
+										? 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600' 
+										: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+									}
+								`}
+								title="View All Trackers Debug Data"
+							>
+								<Code className="h-4 w-4" />
+							</button>
 						</div>
 					</div>
 				</div>
@@ -524,6 +587,44 @@ export default function Popup() {
 						availableTrackers={availableTrackers}
 						availableEvents={availableEvents}
 					/>
+				)}
+
+				{/* Debug Panel */}
+				{showDebugPanel && (
+					<div className="mx-3 mb-3 p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+						<div className="flex items-center justify-between mb-3">
+							<div className="flex items-center gap-2">
+								<Code className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+								<h3 className="text-sm font-semibold text-purple-900 dark:text-purple-100">
+									All Trackers Debug Data
+								</h3>
+							</div>
+							<button
+								onClick={handleCopyDebugData}
+								className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60 rounded transition-colors"
+							>
+								{debugDataCopied ? (
+									<>
+										<Check className="h-3 w-3" />
+										Copied!
+									</>
+								) : (
+									<>
+										<Copy className="h-3 w-3" />
+										Copy JSON
+									</>
+								)}
+							</button>
+						</div>
+						<div className="max-h-64 overflow-y-auto">
+							<pre className="text-xs text-purple-800 dark:text-purple-200 whitespace-pre-wrap break-words bg-white dark:bg-purple-950/40 p-2 rounded border border-purple-200 dark:border-purple-700">
+								{JSON.stringify(generateDebugData(), null, 2)}
+							</pre>
+						</div>
+						<div className="mt-2 text-xs text-purple-600 dark:text-purple-400">
+							This contains all detected trackers, their events, and parameters for debugging purposes.
+						</div>
+					</div>
 				)}
 
 				{/* Main Content */}
