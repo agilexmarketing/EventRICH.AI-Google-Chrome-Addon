@@ -303,7 +303,12 @@ export default function Popup() {
 
 	// Handle login success
 	const handleLoginSuccess = useCallback((response: any) => {
-		setUserData(response.data.user);
+		// Store user data with subscription_status at the correct level
+		const userData = {
+			...response.data.user,
+			subscription_status: response.data.subscription_status
+		};
+		setUserData(userData);
 		setIsLoggedIn(true);
 		setShowLoginModal(false);
 		
@@ -312,7 +317,7 @@ export default function Popup() {
 			userId: response.data.user?.id, 
 			email: response.data.user?.email,
 			credits: response.data.user?.credits,
-			subscription: response.data.user?.subscription_status?.plan
+			subscription: response.data.subscription_status?.plan
 		});
 		NotificationManager.success('Login Successful', `Welcome back, ${response.data.user.name}! Credits: ${response.data.user.credits}`);
 		console.log("User logged in successfully:", response.data.user);

@@ -23,6 +23,9 @@ export {
 	type Notification
 } from "../types";
 
+// Re-export API utilities
+export * from './api';
+
 // Existing utility function
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));

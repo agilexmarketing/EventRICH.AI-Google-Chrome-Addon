@@ -61,28 +61,32 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			console.log('EventRICH.AI Login: Response data:', data);
 
 			if (response.ok && data.success) {
-				// Store authentication data
+				// Store authentication data according to API spec
 				await chrome.storage.local.set({
 					eventrich_auth: {
-						token: data.data.user.api_token,
+						token: data.api_token,
 						user: data.data.user,
-						config: data.data.addon_config,
+						subscription_status: data.data.subscription_status,
 						timestamp: Date.now()
 					}
 				});
 
+				console.log('EventRICH.AI Login: Successfully stored auth data');
 				onLoginSuccess(data);
 				setEmail('');
 				setPassword('');
 				onClose();
 			} else {
-				// Handle specific error codes
+				// Handle specific error codes according to API spec
 				switch (response.status) {
 					case 400:
 						setError(data.error || 'Invalid data provided. Please check your input.');
 						break;
 					case 401:
 						setError('Invalid email or password. Please try again.');
+						break;
+					case 402:
+						setError('Insufficient credits. Please upgrade your plan.');
 						break;
 					case 403:
 						setError('Your account has been deactivated. Please contact support.');
