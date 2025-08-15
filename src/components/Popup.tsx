@@ -1,4 +1,4 @@
-import { Eye, Settings, Search, BarChart3, Code, Copy, Check, FileText, Download } from "lucide-react";
+import { Eye, Settings, Search, BarChart3, Code, Copy, Check, FileText, Download, User } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { 
 	CURRENT_URL, 
@@ -30,6 +30,7 @@ import DebugPanel from "./DebugPanel";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import ErrorBoundary from "./ErrorBoundary";
 import PluginToggle from "./PluginToggle";
+import LoginModal from "./LoginModal";
 
 export default function Popup() {
 	const { isDark } = useTheme(); // Add theme awareness
@@ -98,6 +99,9 @@ export default function Popup() {
 	const [extractedScripts, setExtractedScripts] = useState<{ source: string; content: string; type: string }[]>([]);
 	const [scriptsLoading, setScriptsLoading] = useState(false);
 	const [scriptsCopied, setScriptsCopied] = useState(false);
+	const [showLoginModal, setShowLoginModal] = useState(false);
+	const [userData, setUserData] = useState<any>(null);
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [scriptsFileDownloaded, setScriptsFileDownloaded] = useState(false);
 
 
@@ -262,6 +266,18 @@ export default function Popup() {
 	const handlePluginToggle = useCallback((enabled: boolean) => {
 		setIsPluginEnabled(enabled);
 		AuditLogger.log('plugin_toggled', { enabled, timestamp: new Date().toISOString() });
+	}, []);
+
+	// Handle login success
+	const handleLoginSuccess = useCallback((response: LoginResponse) => {
+		setUserData(response.user);
+		setIsLoggedIn(true);
+		setShowLoginModal(false);
+		
+		// Log successful login
+		AuditLogger.log('user_login', { userId: response.user?.id, email: response.user?.email });
+		NotificationManager.success('Login Successful', `Welcome back, ${response.user.name}!`);
+		console.log("User logged in successfully:", response.user);
 	}, []);
 
 	useEffect(() => {
@@ -731,12 +747,7 @@ export default function Popup() {
 		return () => document.removeEventListener('keydown', handleKeyDown);
 	}, [settings.keyboardShortcuts, filteredAllEvents.length]);
 
-	const handleLoginSuccess = (userData: LoginResponse["user"]) => {
-		// Log successful login
-		AuditLogger.log('user_login', { userId: userData?.id, email: userData?.email });
-		NotificationManager.success('Login Successful', `Welcome back, ${userData?.name || userData?.email}!`);
-		console.log("User logged in successfully:", userData);
-	};
+
 
 	const hasAnyEvents = 
 		filteredEventRichPixel.id || 
@@ -808,6 +819,20 @@ export default function Popup() {
 						{isPluginEnabled && (
 							<div className="w-2 h-2 bg-green-500 rounded-full" title="Plugin is active" />
 						)}
+						<button
+							onClick={() => setShowLoginModal(true)}
+							className={`
+								flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+								border border-gray-200 dark:border-gray-600
+								${isLoggedIn 
+									? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600' 
+									: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+								}
+							`}
+							title={isLoggedIn ? `Logged in as ${userData?.name || 'User'}` : "Login to EventRICH.AI"}
+						>
+							<User className="h-4 w-4" />
+						</button>
 						<div className="flex items-center gap-1">
 							<AnalyticsDashboard allTrackers={allTrackers} />
 							<ExportButton 
@@ -1140,15 +1165,19 @@ export default function Popup() {
 					)}
 				</div>
 
-					{/* Login Form */}
-					<LoginForm onLoginSuccess={handleLoginSuccess} />
-
 					{/* Debug Panel */}
 					{settings.debugMode && (
 						<DebugPanel events={filteredAllEvents} />
 					)}
 				</div>
 			</div>
+
+			{/* Login Modal */}
+			<LoginModal 
+				isOpen={showLoginModal}
+				onClose={() => setShowLoginModal(false)}
+				onLoginSuccess={handleLoginSuccess}
+			/>
 		</ErrorBoundary>
 	);
 }
