@@ -1057,7 +1057,8 @@ export default function Popup() {
 							return colors[Math.abs(nameHash) % colors.length];
 						};
 
-						const visibleTrackers = [
+						// Collect all trackers with IDs
+						const allTrackersWithIds = [
 							filteredEventRichPixel.id ? filteredEventRichPixel : null,
 							filteredGoogleAnalytics.id ? filteredGoogleAnalytics : null,
 							filteredGoogleAds.id ? filteredGoogleAds : null,
@@ -1066,6 +1067,16 @@ export default function Popup() {
 							filteredGoogleTagManager.id ? filteredGoogleTagManager : null,
 							...filteredOtherTrackers.filter(tracker => tracker.id)
 						].filter(Boolean);
+
+						// Sort alphabetically with EventRICH.AI always first
+						const visibleTrackers = allTrackersWithIds.sort((a, b) => {
+							// EventRICH.AI always comes first
+							if (a.name === "EventRICH.AI Pixel") return -1;
+							if (b.name === "EventRICH.AI Pixel") return 1;
+							
+							// Sort all others alphabetically
+							return a.name.localeCompare(b.name);
+						});
 
 						return visibleTrackers.map((tracker, index) => (
 							<div 
