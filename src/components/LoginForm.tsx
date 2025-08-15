@@ -128,12 +128,6 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
 	return (
 		<div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800">
-			<div className="mb-2">
-				<h3 className="text-sm font-medium text-gray-900 dark:text-white">
-					Login to activate your credits
-				</h3>
-			</div>
-			
 			<form onSubmit={handleLogin} className="space-y-2">
 				<div className="flex gap-2">
 					<div className="flex-1">
@@ -190,7 +184,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 				)}
 			</form>
 			
-			<div className="mt-2 text-center space-y-1">
+			<div className="mt-2 text-center">
 				<p className="text-xs text-gray-500 dark:text-gray-400">
 					Don't have an account?{" "}
 					<button
@@ -199,8 +193,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 					>
 						Sign up
 					</button>
-				</p>
-				<p className="text-xs text-gray-500 dark:text-gray-400">
+					{" • "}
 					<button
 						onClick={() => window.chrome.tabs.create({ url: 'https://dash.eventrich.ai/forgot-password' })}
 						className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
