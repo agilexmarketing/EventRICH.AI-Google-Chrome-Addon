@@ -2,6 +2,8 @@
 module.exports = {
 	content: [
 		"./src/**/*.{js,ts,jsx,tsx}", // Scans all your src files for Tailwind usage
+		"./public/**/*.html", // Include HTML files
+		"./dist/**/*.js", // Include built files
 	],
 	darkMode: 'class', // Enable class-based dark mode
 	theme: {
