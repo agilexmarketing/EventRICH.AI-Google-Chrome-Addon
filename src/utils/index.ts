@@ -62,6 +62,7 @@ export class ThemeManager {
 	static applyTheme(theme: ThemeMode): void {
 		console.log('[ThemeManager] Applying theme:', theme);
 		const root = document.documentElement;
+		const body = document.body;
 		
 		if (theme === ThemeMode.SYSTEM) {
 			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -71,18 +72,27 @@ export class ThemeManager {
 		
 		console.log('[ThemeManager] Final theme to apply:', theme);
 		console.log('[ThemeManager] Root element classes before:', root.className);
+		console.log('[ThemeManager] Body element classes before:', body.className);
 		
 		if (theme === ThemeMode.DARK) {
 			root.classList.add('dark');
+			body.classList.add('dark');
 		} else {
 			root.classList.remove('dark');
+			body.classList.remove('dark');
 		}
 		
 		console.log('[ThemeManager] Root element classes after:', root.className);
+		console.log('[ThemeManager] Body element classes after:', body.className);
 	}
 
 	static async initializeTheme(): Promise<void> {
+		console.log('[ThemeManager] Initializing theme...');
 		const theme = await this.getThemeAsync();
+		console.log('[ThemeManager] Retrieved theme from storage:', theme);
+		
+		// Remove loading class and apply theme
+		document.documentElement.classList.remove('theme-loading');
 		this.applyTheme(theme);
 		
 		// Listen for system theme changes
@@ -92,6 +102,8 @@ export class ThemeManager {
 				this.applyTheme(ThemeMode.SYSTEM);
 			}
 		});
+		
+		console.log('[ThemeManager] Theme initialization complete');
 	}
 }
 
