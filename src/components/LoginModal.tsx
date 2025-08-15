@@ -37,6 +37,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			const manifest = chrome.runtime.getManifest();
 			const addonVersion = manifest.version || '1.0.0';
 
+			console.log('EventRICH.AI Login: Attempting login to dash.eventrich.ai');
+			console.log('EventRICH.AI Login: Device ID:', deviceId);
+			console.log('EventRICH.AI Login: Addon Version:', addonVersion);
+
 			const response = await fetch('https://dash.eventrich.ai/applications/google_chrome_addon/login.php', {
 				method: 'POST',
 				headers: {
@@ -50,7 +54,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				}),
 			});
 
+			console.log('EventRICH.AI Login: Response status:', response.status);
+			console.log('EventRICH.AI Login: Response headers:', response.headers);
+
 			const data = await response.json();
+			console.log('EventRICH.AI Login: Response data:', data);
 
 			if (response.ok && data.success) {
 				// Store authentication data
