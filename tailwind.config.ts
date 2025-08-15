@@ -3,6 +3,7 @@ module.exports = {
 	content: [
 		"./src/**/*.{js,ts,jsx,tsx}", // Scans all your src files for Tailwind usage
 	],
+	darkMode: 'class', // Enable class-based dark mode
 	theme: {
 		extend: {
 			keyframes: {
