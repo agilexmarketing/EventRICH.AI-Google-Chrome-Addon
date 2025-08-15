@@ -32,11 +32,11 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 	const getCurrentIcon = () => {
 		switch (theme) {
 			case ThemeMode.LIGHT:
-				return <Sun className="h-4 w-4" />;
+				return <Sun className="h-3.5 w-3.5" />;
 			case ThemeMode.DARK:
-				return <Moon className="h-4 w-4" />;
+				return <Moon className="h-3.5 w-3.5" />;
 			case ThemeMode.SYSTEM:
-				return <Monitor className="h-4 w-4" />;
+				return <Monitor className="h-3.5 w-3.5" />;
 		}
 	};
 
@@ -66,7 +66,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 		<button
 			onClick={cycleTheme}
 			className={`
-				flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+				flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 				bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
 				text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white
 				border border-gray-200 dark:border-gray-600

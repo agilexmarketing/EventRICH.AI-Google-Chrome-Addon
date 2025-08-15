@@ -71,7 +71,7 @@ export default function ExportButton({
 				<button
 					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 					className={`
-						flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+						flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 						bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
 						text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400
 						border border-gray-200 dark:border-gray-600
@@ -80,7 +80,7 @@ export default function ExportButton({
 					title="Export tracking data"
 					disabled={data.length === 0}
 				>
-					<Download className="h-4 w-4" />
+					<Download className="h-3.5 w-3.5" />
 				</button>
 
 				{isDropdownOpen && (

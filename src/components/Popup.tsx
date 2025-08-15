@@ -861,7 +861,7 @@ export default function Popup() {
 								}
 							}}
 							className={`
-								flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+								flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 								border border-gray-200 dark:border-gray-600
 								${isLoggedIn 
 									? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600' 
@@ -871,7 +871,7 @@ export default function Popup() {
 							`}
 							title={isLoggedIn ? `Logged in as ${userData?.name || userData?.email} | Credits: ${userData?.credits || 0} | Plan: ${userData?.subscription_status?.plan || 'Free'} | Right-click to logout` : "Login to EventRICH.AI"}
 						>
-							<User className="h-4 w-4" />
+							<User className="h-3.5 w-3.5" />
 						</button>
 						<div className="flex items-center gap-1">
 							<AnalyticsDashboard allTrackers={allTrackers} />
@@ -883,7 +883,7 @@ export default function Popup() {
 							<button
 								onClick={() => setShowFilters(!showFilters)}
 								className={`
-									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 									border border-gray-200 dark:border-gray-600 relative
 									${showFilters 
 										? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600' 
@@ -892,15 +892,15 @@ export default function Popup() {
 								`}
 								title="Toggle filters (Ctrl+F)"
 							>
-								<Search className="h-4 w-4" />
+								<Search className="h-3.5 w-3.5" />
 								{(filter.searchTerm || filter.tracker || filter.eventName || filter.dateRange) && (
-									<span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-2 h-2 rounded-full"></span>
+									<span className="absolute -top-0.5 -right-0.5 bg-blue-500 text-white text-xs w-1.5 h-1.5 rounded-full"></span>
 								)}
 							</button>
 							<button
 								onClick={() => setShowDebugPanel(!showDebugPanel)}
 								className={`
-									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 									border border-gray-200 dark:border-gray-600
 									${showDebugPanel 
 										? 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600' 
@@ -909,12 +909,12 @@ export default function Popup() {
 								`}
 								title="View All Trackers Debug Data"
 							>
-								<Code className="h-4 w-4" />
+								<Code className="h-3.5 w-3.5" />
 							</button>
 							<button
 								onClick={() => setShowScriptExtractor(!showScriptExtractor)}
 								className={`
-									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 									border border-gray-200 dark:border-gray-600
 									${showScriptExtractor 
 										? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600' 
@@ -923,7 +923,7 @@ export default function Popup() {
 								`}
 								title="Extract Page Scripts for AI Analysis"
 							>
-								<FileText className="h-4 w-4" />
+								<FileText className="h-3.5 w-3.5" />
 							</button>
 						</div>
 					</div>

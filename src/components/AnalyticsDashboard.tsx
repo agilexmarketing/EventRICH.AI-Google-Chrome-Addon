@@ -88,7 +88,7 @@ export default function AnalyticsDashboard({ allTrackers, className }: Analytics
 			<button
 				onClick={() => setIsOpen(true)}
 				className={`
-					flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+					flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 					bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
 					text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400
 					border border-gray-200 dark:border-gray-600
@@ -96,7 +96,7 @@ export default function AnalyticsDashboard({ allTrackers, className }: Analytics
 				`}
 				title="View Analytics Dashboard"
 			>
-				<BarChart3 className="h-4 w-4" />
+				<BarChart3 className="h-3.5 w-3.5" />
 			</button>
 		);
 	}
