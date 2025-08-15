@@ -26,13 +26,13 @@ export default function NotificationCenter() {
 	const getBackgroundColor = (type: NotificationType) => {
 		switch (type) {
 			case NotificationType.SUCCESS:
-				return "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800";
+				return "bg-green-100 dark:bg-green-800 border-green-300 dark:border-green-600";
 			case NotificationType.ERROR:
-				return "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800";
+				return "bg-red-100 dark:bg-red-800 border-red-300 dark:border-red-600";
 			case NotificationType.WARNING:
-				return "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800";
+				return "bg-yellow-100 dark:bg-yellow-800 border-yellow-300 dark:border-yellow-600";
 			case NotificationType.INFO:
-				return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
+				return "bg-blue-100 dark:bg-blue-800 border-blue-300 dark:border-blue-600";
 		}
 	};
 
@@ -41,22 +41,22 @@ export default function NotificationCenter() {
 	}
 
 	return (
-		<div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+		<div className="absolute top-2 right-2 z-50 space-y-2 max-w-xs">
 			{notifications.map((notification) => (
 				<div
 					key={notification.id}
 					className={`
 						${getBackgroundColor(notification.type)}
-						border rounded-lg p-3 shadow-lg animate-in slide-in-from-right-full duration-300
+						border rounded-lg p-3 shadow-xl animate-in slide-in-from-right-full duration-300
 					`}
 				>
 					<div className="flex items-start gap-3">
 						{getIcon(notification.type)}
 						<div className="flex-1 min-w-0">
-							<p className="text-sm font-medium text-gray-900 dark:text-white">
+							<p className="text-sm font-semibold text-gray-900 dark:text-white">
 								{notification.title}
 							</p>
-							<p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+							<p className="text-xs text-gray-700 dark:text-gray-100 mt-1">
 								{notification.message}
 							</p>
 						</div>
