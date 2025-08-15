@@ -12,8 +12,7 @@
         max-height: 600px;
         margin: 0;
         padding: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: hidden;
         background-color: white;
       }
       html.dark, body.dark {
@@ -25,6 +24,7 @@
         max-height: 600px;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       }
       
       /* Enhanced dynamic popup resizing based on content */
@@ -32,6 +32,7 @@
         min-height: fit-content;
         max-height: 580px;
         overflow-y: auto;
+        overflow-x: hidden;
         transition: min-height 0.3s ease-in-out, max-height 0.3s ease-in-out;
       }
       
