@@ -29,14 +29,15 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 		await setTheme(nextTheme);
 	};
 
-	const getCurrentIcon = () => {
+	const getNextIcon = () => {
+		// Show the icon for the theme you'll switch TO, not the current theme
 		switch (theme) {
 			case ThemeMode.LIGHT:
-				return <Sun className="h-3.5 w-3.5" />;
+				return <Moon className="h-3.5 w-3.5" />; // Click to go to dark
 			case ThemeMode.DARK:
-				return <Moon className="h-3.5 w-3.5" />;
+				return <Monitor className="h-3.5 w-3.5" />; // Click to go to system
 			case ThemeMode.SYSTEM:
-				return <Monitor className="h-3.5 w-3.5" />;
+				return <Sun className="h-3.5 w-3.5" />; // Click to go to light
 		}
 	};
 
@@ -74,7 +75,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 			`}
 			title={`Current: ${getCurrentLabel()} theme. Click to switch to ${getNextThemeLabel()}`}
 		>
-			{getCurrentIcon()}
+			{getNextIcon()}
 		</button>
 	);
 }
