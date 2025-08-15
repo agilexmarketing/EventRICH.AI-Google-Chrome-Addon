@@ -36,6 +36,9 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 		
 		setTheme(nextTheme);
 		await ThemeManager.setTheme(nextTheme);
+		
+		// Force immediate theme application
+		ThemeManager.applyTheme(nextTheme);
 	};
 
 	const getCurrentIcon = () => {
@@ -75,7 +78,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 		<button
 			onClick={cycleTheme}
 			className={`
-				flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+				flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
 				bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
 				text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white
 				border border-gray-200 dark:border-gray-600
@@ -84,7 +87,6 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 			title={`Current: ${getCurrentLabel()} theme. Click to switch to ${getNextThemeLabel()}`}
 		>
 			{getCurrentIcon()}
-			<span className="text-xs">{getCurrentLabel()}</span>
 		</button>
 	);
 }
