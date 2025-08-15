@@ -998,11 +998,18 @@ export class TrackerDetector {
 	 * Check if a URL matches any tracker detection rules
 	 */
 	static findMatchingRule(url: string): TrackerDetectionRule | null {
+		// Debug logging to see why URLs aren't matching
+		console.log('🔍 Checking URL for tracker rules:', url);
+		
 		for (const rule of TRACKER_DETECTION_RULES) {
-			if (rule.urlPatterns.some(pattern => url.includes(pattern))) {
+			const matchingPattern = rule.urlPatterns.find(pattern => url.includes(pattern));
+			if (matchingPattern) {
+				console.log('✅ URL matched rule:', rule.name, 'with pattern:', matchingPattern);
 				return rule;
 			}
 		}
+		
+		console.log('❌ No rule matched for URL:', url);
 		return null;
 	}
 
