@@ -3,6 +3,8 @@ import path from "node:path";
 import rspack from "@rspack/core";
 
 export default defineConfig({
+	mode: "production",
+	devtool: false, // Disable source maps to avoid eval() usage
 	entry: {
 		popup: "./src/popup.tsx",
 		background: "./src/background.ts",
@@ -11,6 +13,7 @@ export default defineConfig({
 	output: {
 		path: path.resolve(__dirname, "dist"),
 		filename: "[name].js",
+		chunkLoadingGlobal: "webpackChunkEventRichAI", // Custom global to avoid conflicts
 	},
 	performance: {
 		hints: false, // Disable performance warnings for Chrome extension
