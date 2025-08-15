@@ -303,12 +303,7 @@ export default function Popup() {
 
 	// Handle login success
 	const handleLoginSuccess = useCallback((response: any) => {
-		// Store user data with subscription_status at the correct level
-		const userData = {
-			...response.data.user,
-			subscription_status: response.data.subscription_status
-		};
-		setUserData(userData);
+		setUserData(response.data.user);
 		setIsLoggedIn(true);
 		setShowLoginModal(false);
 		
@@ -316,8 +311,7 @@ export default function Popup() {
 		AuditLogger.log('user_login', { 
 			userId: response.data.user?.id, 
 			email: response.data.user?.email,
-			credits: response.data.user?.credits,
-			subscription: response.data.subscription_status?.plan
+			credits: response.data.user?.credits
 		});
 		NotificationManager.success('Login Successful', `Welcome back, ${response.data.user.name}! Credits: ${response.data.user.credits}`);
 		console.log("User logged in successfully:", response.data.user);
@@ -325,7 +319,16 @@ export default function Popup() {
 
 	// Handle logout
 	const handleLogout = useCallback(async () => {
-		await chrome.storage.local.remove(['eventrich_auth']);
+		try {
+			// Import logoutUser dynamically to avoid circular import
+			const { logoutUser } = await import('../utils/api');
+			await logoutUser();
+		} catch (error) {
+			console.error('Logout error:', error);
+			// Fallback to local logout
+			await chrome.storage.local.remove(['eventrich_auth']);
+		}
+		
 		setUserData(null);
 		setIsLoggedIn(false);
 		
@@ -911,7 +914,7 @@ export default function Popup() {
 								}
 								${isLoggedIn ? 'cursor-default' : 'cursor-pointer'}
 							`}
-							title={isLoggedIn ? `Logged in as ${userData?.name || userData?.email} | Credits: ${userData?.credits || 0} | Plan: ${userData?.subscription_status?.plan || 'Free'} | Right-click to logout` : "Login to EventRICH.AI"}
+							title={isLoggedIn ? `Logged in as ${userData?.name || userData?.email} | Credits: ${userData?.credits || 0} | Right-click to logout` : "Login to EventRICH.AI"}
 						>
 							<User className="h-3.5 w-3.5" />
 						</button>

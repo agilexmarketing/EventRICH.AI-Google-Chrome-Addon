@@ -61,17 +61,17 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			console.log('EventRICH.AI Login: Response data:', data);
 
 			if (response.ok && data.success) {
-				// Store authentication data according to API spec
+				// Store authentication data according to updated API spec
 				await chrome.storage.local.set({
 					eventrich_auth: {
-						token: data.api_token,
+						token: data.data.user.api_token,
 						user: data.data.user,
-						subscription_status: data.data.subscription_status,
 						timestamp: Date.now()
 					}
 				});
 
 				console.log('EventRICH.AI Login: Successfully stored auth data');
+				console.log('EventRICH.AI Login: Token:', data.data.user.api_token);
 				onLoginSuccess(data);
 				setEmail('');
 				setPassword('');

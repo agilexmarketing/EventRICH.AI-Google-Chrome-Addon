@@ -25,12 +25,29 @@ export interface UserProfile {
 		email: string;
 		name: string;
 		credits: number;
-		subscription_status: {
-			status: string;
-			plan: string;
-			expires_at: string;
-		};
 	};
+}
+
+export interface UserStats {
+	total_events: number;
+	events_today: number;
+	events_this_week: number;
+	events_this_month: number;
+	last_event_date: string;
+}
+
+export interface TrackEventData {
+	event_type: string;
+	url: string;
+	title?: string;
+	referrer?: string;
+	event_data?: Record<string, any>;
+}
+
+export interface TrackEventResponse {
+	event_id: string;
+	credits_used: number;
+	remaining_credits: number;
 }
 
 /**
@@ -134,6 +151,141 @@ export async function hasUserSufficientCredits(requiredCredits: number = 1): Pro
 }
 
 /**
+ * Logout user from EventRICH.AI
+ * URL: https://dash.eventrich.ai/applications/google_chrome_addon/logout.php
+ */
+export async function logoutUser(): Promise<void> {
+	const token = await getStoredToken();
+	if (!token) {
+		console.log('EventRICH.AI API: No token found for logout');
+		return;
+	}
+
+	try {
+		// Get device ID for logout
+		const storedDeviceId = await chrome.storage.local.get(['eventrich_device_id']);
+		const deviceId = storedDeviceId.eventrich_device_id;
+
+		console.log('EventRICH.AI API: Logging out user');
+		const response = await fetch('https://dash.eventrich.ai/applications/google_chrome_addon/logout.php', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				api_token: token,
+				device_id: deviceId
+			}),
+		});
+
+		const data = await response.json();
+		console.log('EventRICH.AI API: Logout response:', data);
+
+		// Clear local storage regardless of API response
+		await chrome.storage.local.remove(['eventrich_auth']);
+		
+		if (response.ok && data.success) {
+			console.log('EventRICH.AI API: User logged out successfully');
+		}
+	} catch (error) {
+		console.error('EventRICH.AI API: Logout error:', error);
+		// Still clear local storage on error
+		await chrome.storage.local.remove(['eventrich_auth']);
+	}
+}
+
+/**
+ * Get user statistics
+ * URL: https://dash.eventrich.ai/applications/google_chrome_addon/api.php?action=stats
+ */
+export async function getUserStats(): Promise<UserStats> {
+	console.log('EventRICH.AI API: Fetching user stats');
+	const response = await makeApiRequest<UserStats>('api.php?action=stats');
+	
+	if (response.success && response.data) {
+		console.log('EventRICH.AI API: Stats retrieved:', response.data);
+		return response.data;
+	} else {
+		throw new Error(response.error || 'Failed to fetch stats');
+	}
+}
+
+/**
+ * Track a single event
+ * URL: https://dash.eventrich.ai/applications/google_chrome_addon/api.php?action=track
+ */
+export async function trackEvent(eventData: TrackEventData): Promise<TrackEventResponse> {
+	console.log('EventRICH.AI API: Tracking event:', eventData);
+	const response = await makeApiRequest<TrackEventResponse>('api.php?action=track', {
+		method: 'POST',
+		body: JSON.stringify(eventData)
+	});
+	
+	if (response.success && response.data) {
+		console.log('EventRICH.AI API: Event tracked:', response.data);
+		return response.data;
+	} else {
+		throw new Error(response.error || 'Failed to track event');
+	}
+}
+
+/**
+ * Track multiple events in batch
+ * URL: https://dash.eventrich.ai/applications/google_chrome_addon/api.php?action=batch
+ */
+export async function trackBatchEvents(events: TrackEventData[]): Promise<{
+	events_processed: number;
+	credits_used: number;
+	remaining_credits: number;
+	event_ids: string[];
+}> {
+	console.log('EventRICH.AI API: Tracking batch events:', events.length);
+	const response = await makeApiRequest<{
+		events_processed: number;
+		credits_used: number;
+		remaining_credits: number;
+		event_ids: string[];
+	}>('api.php?action=batch', {
+		method: 'POST',
+		body: JSON.stringify({ events })
+	});
+	
+	if (response.success && response.data) {
+		console.log('EventRICH.AI API: Batch events tracked:', response.data);
+		return response.data;
+	} else {
+		throw new Error(response.error || 'Failed to track batch events');
+	}
+}
+
+/**
+ * Use credits for custom operations
+ * URL: https://dash.eventrich.ai/applications/google_chrome_addon/api.php?action=use_credit
+ */
+export async function useCredits(amount: number, reason: string): Promise<{
+	used_amount: number;
+	remaining_credits: number;
+	reason: string;
+}> {
+	console.log('EventRICH.AI API: Using credits:', amount, reason);
+	const response = await makeApiRequest<{
+		used_amount: number;
+		remaining_credits: number;
+		reason: string;
+	}>('api.php?action=use_credit', {
+		method: 'POST',
+		body: JSON.stringify({ amount, reason })
+	});
+	
+	if (response.success && response.data) {
+		console.log('EventRICH.AI API: Credits used:', response.data);
+		return response.data;
+	} else {
+		throw new Error(response.error || 'Failed to use credits');
+	}
+}
+
+/**
  * Refresh user profile data and update local storage
  */
 export async function refreshUserProfile(): Promise<UserProfile | null> {
@@ -147,7 +299,6 @@ export async function refreshUserProfile(): Promise<UserProfile | null> {
 				eventrich_auth: {
 					...authData.eventrich_auth,
 					user: profile.data.user,
-					subscription_status: profile.data.user.subscription_status,
 					timestamp: Date.now() // Refresh timestamp
 				}
 			});
