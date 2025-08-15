@@ -185,6 +185,7 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 			"static.klaviyo.com/onsite/js",
 			"klaviyo.js",
 			"klaviyo_subscribe.js",
+			"klaviyo_subscribe.css",
 			"in_app_forms",
 			"signup_forms",
 			"onsite-triggering",
@@ -208,7 +209,8 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		urlPatterns: [
 			"amplitude.com",
 			"cdn.amplitude.com",
-			"api.amplitude.com"
+			"api.amplitude.com",
+			"api2.amplitude.com"
 		],
 		description: "Amplitude product analytics",
 		extractors: {
@@ -365,7 +367,7 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		description: "LeadsRX attribution and analytics",
 		extractors: {
 			eventName: ["event"],
-			trackerId: ["_lab", "acctTag", "wjshxq43604"]
+			trackerId: ["_lab", "acctTag"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
@@ -443,12 +445,13 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
 			"attn.tv",
-			"cdn.attn.tv"
+			"cdn.attn.tv",
+			".attn.tv"
 		],
 		description: "Attentive SMS and email marketing",
 		extractors: {
 			eventName: ["event"],
-			trackerId: ["dtag", "source"]
+			trackerId: ["dtag", "source", "id"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
@@ -648,7 +651,7 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		],
 		description: "Microsoft Bing Ads conversion tracking",
 		extractors: {
-			eventName: ["event", "ea"],
+			eventName: ["event", "ea", "evt"],
 			trackerId: ["ti", "tag_id"]
 		},
 		dictionary: [],
@@ -828,12 +831,13 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
 			"luckyorange.com",
-			"luckyorange.net"
+			"luckyorange.net",
+			"settings.luckyorange.net"
 		],
 		description: "Lucky Orange session recording and analytics",
 		extractors: {
 			eventName: ["event"],
-			trackerId: ["site_id", "session_id"]
+			trackerId: ["site_id", "session_id", "d"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
