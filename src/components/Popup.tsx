@@ -99,6 +99,23 @@ export default function Popup() {
 	const [extractedScripts, setExtractedScripts] = useState<{ source: string; content: string; type: string }[]>([]);
 	const [scriptsLoading, setScriptsLoading] = useState(false);
 	const [scriptsCopied, setScriptsCopied] = useState(false);
+	
+	// Accordion expansion tracking for dynamic sizing
+	const [expandedAccordions, setExpandedAccordions] = useState<Set<string>>(new Set());
+
+	// Handle accordion toggle for dynamic sizing
+	const handleAccordionToggle = useCallback((accordionId: string, isExpanded: boolean) => {
+		setExpandedAccordions(prev => {
+			const newSet = new Set(prev);
+			if (isExpanded) {
+				newSet.add(accordionId);
+			} else {
+				newSet.delete(accordionId);
+			}
+			return newSet;
+		});
+	}, []);
+	
 	const [showLoginModal, setShowLoginModal] = useState(false);
 	const [userData, setUserData] = useState<any>(null);
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -791,8 +808,8 @@ export default function Popup() {
 		filteredGoogleTagManager.id || 
 		filteredOtherTrackers.some(t => t.id);
 
-	// Helper function to determine container classes based on tracker count
-	const getContainerClasses = () => {
+	// Enhanced dynamic container sizing based on content and expanded state
+	const getDynamicContainerClasses = () => {
 		const totalTrackers = [
 			filteredEventRichPixel.id ? 1 : 0,
 			filteredGoogleAnalytics.id ? 1 : 0,
@@ -803,18 +820,38 @@ export default function Popup() {
 			...filteredOtherTrackers.filter(t => t.id).map(() => 1)
 		].reduce((sum, count) => sum + count, 0);
 
+		const expandedCount = expandedAccordions.size;
+		const hasExpandedItems = expandedCount > 0;
+		const hasFilters = showFilters;
+		const hasDebugPanel = showDebugPanel;
+		const hasScriptExtractor = showScriptExtractor;
+
+		// Base classes
+		let classes = "popup-container transition-all duration-300 ease-in-out";
+
+		// Determine size based on content
 		if (totalTrackers === 0) {
-			return "popup-container no-events-container";
-		} else if (totalTrackers <= 3) {
-			return "popup-container few-events-container";
+			classes += " no-events-container";
+		} else if (totalTrackers === 1 && !hasExpandedItems && !hasFilters && !hasDebugPanel && !hasScriptExtractor) {
+			classes += " single-tracker-container";
+		} else if (totalTrackers <= 2 && !hasExpandedItems) {
+			classes += " few-trackers-container";
+		} else if (totalTrackers <= 4 && expandedCount <= 1) {
+			classes += " medium-trackers-container";
+		} else if (hasExpandedItems && expandedCount >= 2) {
+			classes += " many-expanded-container";
+		} else if (totalTrackers > 6 || hasFilters || hasDebugPanel || hasScriptExtractor) {
+			classes += " large-content-container";
 		} else {
-			return "popup-container many-events-container";
+			classes += " standard-container";
 		}
+
+		return classes;
 	};
 
 	return (
 		<ErrorBoundary>
-			<div className={`w-[480px] flex flex-col bg-white dark:bg-gray-900 relative ${getContainerClasses()}`}>
+			<div className={`w-[480px] flex flex-col bg-white dark:bg-gray-900 relative ${getDynamicContainerClasses()}`}>
 				<NotificationCenter />
 				
 				{/* Plugin Disabled Overlay */}
@@ -1174,7 +1211,7 @@ export default function Popup() {
 								key={`${tracker!.name}-${tracker!.id}`}
 								className={getTrackerBackgroundColor(tracker!.name)}
 							>
-								<DataItem item={tracker!} />
+								<DataItem item={tracker!} onToggle={handleAccordionToggle} />
 							</div>
 						));
 					})()}

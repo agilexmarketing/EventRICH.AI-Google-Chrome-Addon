@@ -27,26 +27,53 @@
         flex-direction: column;
       }
       
-      /* Ensure popup resizes based on content */
+      /* Enhanced dynamic popup resizing based on content */
       .popup-container {
         min-height: fit-content;
         max-height: 580px;
         overflow-y: auto;
+        transition: min-height 0.3s ease-in-out, max-height 0.3s ease-in-out;
       }
       
-      /* No events state - smaller height */
+      /* No events state - minimal height */
       .no-events-container {
-        min-height: 250px;
+        min-height: 200px;
+        max-height: 250px;
       }
       
-      /* Few events state - medium height */
-      .few-events-container {
-        min-height: 300px;
+      /* Single tracker state - compact */
+      .single-tracker-container {
+        min-height: 180px;
+        max-height: 280px;
       }
       
-      /* Many events state - allow scrolling */
-      .many-events-container {
-        min-height: 400px;
+      /* Few trackers state - small */
+      .few-trackers-container {
+        min-height: 220px;
+        max-height: 320px;
+      }
+      
+      /* Medium trackers state - moderate */
+      .medium-trackers-container {
+        min-height: 280px;
+        max-height: 380px;
+      }
+      
+      /* Standard state - normal */
+      .standard-container {
+        min-height: 340px;
+        max-height: 450px;
+      }
+      
+      /* Many expanded accordions - larger */
+      .many-expanded-container {
+        min-height: 420px;
+        max-height: 560px;
+      }
+      
+      /* Large content (filters, debug, scripts) - maximum */
+      .large-content-container {
+        min-height: 480px;
         max-height: 580px;
       }
     </style>

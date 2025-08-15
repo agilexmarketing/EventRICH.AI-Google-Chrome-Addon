@@ -5,7 +5,12 @@ import { SygnalDataItem } from "../types";
 import DataItemAccordion from "./DataItemAccordion";
 import Tooltip from "./Tooltip";
 
-export default function DataItem({ item }: { item: SygnalDataItem }) {
+interface DataItemProps {
+	item: SygnalDataItem;
+	onToggle?: (itemId: string, isExpanded: boolean) => void;
+}
+
+export default function DataItem({ item, onToggle }: DataItemProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	// Count total events for this tracker
@@ -18,7 +23,13 @@ export default function DataItem({ item }: { item: SygnalDataItem }) {
 		<div className="py-1 px-3 flex flex-col gap-1">
 			<div 
 				className="flex items-center justify-between gap-2 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-1 transition-colors duration-200"
-				onClick={() => totalEvents > 0 && setIsExpanded(!isExpanded)}
+				onClick={() => {
+					if (totalEvents > 0) {
+						const newExpanded = !isExpanded;
+						setIsExpanded(newExpanded);
+						onToggle?.(item.id, newExpanded);
+					}
+				}}
 			>
 				<div className="flex items-center gap-2">
 					{item.name === "EventRICH.AI Pixel" ? (
