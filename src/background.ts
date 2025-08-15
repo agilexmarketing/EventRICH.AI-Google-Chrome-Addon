@@ -2,11 +2,29 @@ import {
 	DictionaryItem,
 	Events,
 	SygnalDataEventCategoryParameter,
+	PLUGIN_ENABLED_KEY,
 } from "./types";
 import { TrackerDetector, TrackerDetectionContext, isGTMEvent } from "./trackerConfig";
 import { RateLimiter, PerformanceMonitor, ErrorHandler, AuditLogger } from "./utils";
 
 console.info("EventRICH.AI Background loaded.");
+
+// Plugin state tracking
+let isPluginEnabled = true;
+
+// Load initial plugin state
+chrome.storage.local.get([PLUGIN_ENABLED_KEY], (result) => {
+	isPluginEnabled = result[PLUGIN_ENABLED_KEY] !== false; // Default to true
+	console.info(`EventRICH.AI Plugin ${isPluginEnabled ? 'enabled' : 'disabled'}`);
+});
+
+// Listen for plugin state changes
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action === "updatePluginState") {
+		isPluginEnabled = message.enabled;
+		console.info(`EventRICH.AI Plugin ${isPluginEnabled ? 'enabled' : 'disabled'}`);
+	}
+});
 
 // Request deduplication cache
 const requestCache = new Map<string, { timestamp: number; response: any }>();
@@ -188,6 +206,11 @@ const init = async () => {
 			// Use an IIFE to handle async operations
 			(async () => {
 				try {
+					// Check if plugin is enabled
+					if (!isPluginEnabled) {
+						return; // Skip tracking when plugin is disabled
+					}
+
 					// Rate limiting check
 					if (!RateLimiter.isAllowed(RATE_LIMIT_CONFIG.globalKey, RATE_LIMIT_CONFIG.maxRequests, RATE_LIMIT_CONFIG.windowMs)) {
 						console.warn('Rate limit exceeded for tracking detection');

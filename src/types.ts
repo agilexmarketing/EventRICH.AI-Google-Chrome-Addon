@@ -97,3 +97,10 @@ export interface LoginRequest {
 	addon_version: string;
 	device_id: string;
 }
+
+export interface PluginSettings {
+	enabled: boolean;
+	theme: ThemeMode;
+}
+
+export const PLUGIN_ENABLED_KEY = "pluginEnabled";

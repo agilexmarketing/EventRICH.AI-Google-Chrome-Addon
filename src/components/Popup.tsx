@@ -8,7 +8,8 @@ import {
 	LoginResponse,
 	EventFilter,
 	UserSettings,
-	ThemeMode
+	ThemeMode,
+	PLUGIN_ENABLED_KEY
 } from "../types";
 import { 
 	ThemeManager, 
@@ -27,9 +28,12 @@ import ExportButton from "./ExportButton";
 import DebugPanel from "./DebugPanel";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import ErrorBoundary from "./ErrorBoundary";
+import PluginToggle from "./PluginToggle";
 
 export default function Popup() {
 	const [currentUrl, setCurrentUrl] = useState("");
+	const [isPluginEnabled, setIsPluginEnabled] = useState<boolean>(true);
+	const [isLoadingPluginState, setIsLoadingPluginState] = useState<boolean>(true);
 	const [settings, setSettings] = useState<UserSettings>({
 		theme: ThemeMode.SYSTEM,
 		autoExport: false,
@@ -222,6 +226,12 @@ export default function Popup() {
 			try {
 				PerformanceMonitor.startMeasurement('popup_initialization');
 				
+				// Load plugin enabled state first
+				const pluginResult = await chrome.storage.local.get([PLUGIN_ENABLED_KEY]);
+				const enabled = pluginResult[PLUGIN_ENABLED_KEY] !== false; // Default to true
+				setIsPluginEnabled(enabled);
+				setIsLoadingPluginState(false);
+				
 				// Initialize theme
 				await ThemeManager.initializeTheme();
 				
@@ -240,10 +250,17 @@ export default function Popup() {
 			} catch (error) {
 				ErrorHandler.logError(error as Error, 'Popup initialization');
 				NotificationManager.error('Initialization Error', 'Failed to initialize popup');
+				setIsLoadingPluginState(false);
 			}
 		};
 
 		initialize();
+	}, []);
+
+	// Handle plugin toggle
+	const handlePluginToggle = useCallback((enabled: boolean) => {
+		setIsPluginEnabled(enabled);
+		AuditLogger.log('plugin_toggled', { enabled, timestamp: new Date().toISOString() });
 	}, []);
 
 	useEffect(() => {
@@ -734,8 +751,23 @@ export default function Popup() {
 			<div className="w-[450px] flex flex-col bg-white dark:bg-gray-900 relative">
 				<NotificationCenter />
 				
+				{/* Plugin Disabled Overlay */}
+				{!isPluginEnabled && !isLoadingPluginState && (
+					<div className="absolute inset-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex items-center justify-center">
+						<div className="text-center p-6">
+							<h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+								EventRICH.AI Disabled
+							</h2>
+							<p className="text-gray-600 dark:text-gray-400 mb-6">
+								Enable the plugin to start tracking events and save resources
+							</p>
+							<PluginToggle onToggle={handlePluginToggle} className="mx-auto" />
+						</div>
+					</div>
+				)}
+				
 				{/* Header */}
-				<div className="flex items-center justify-between gap-4 pb-3 border-b border-gray-200 dark:border-gray-700 px-3 pt-3">
+				<div className={`flex items-center justify-between gap-4 pb-3 border-b border-gray-200 dark:border-gray-700 px-3 pt-3 ${!isPluginEnabled ? 'blur-sm' : ''}`}>
 					<div 
 						className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
 						onClick={() => {
@@ -751,6 +783,9 @@ export default function Popup() {
 					
 					<div className="flex items-center gap-2">
 						<ThemeToggle />
+						{isPluginEnabled && (
+							<div className="w-2 h-2 bg-green-500 rounded-full" title="Plugin is active" />
+						)}
 						<div className="flex items-center gap-1">
 							<AnalyticsDashboard allTrackers={allTrackers} />
 							<ExportButton 
@@ -808,7 +843,7 @@ export default function Popup() {
 				</div>
 
 				{/* Status Bar */}
-				<div className="px-3 py-2 text-xs text-gray-600 dark:text-gray-300">
+				<div className={`px-3 py-2 text-xs text-gray-600 dark:text-gray-300 ${!isPluginEnabled ? 'blur-sm' : ''}`}>
 					{isLoading ? (
 						<div className="flex items-center gap-2">
 							<div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -842,16 +877,18 @@ export default function Popup() {
 					)}
 				</div>
 
-				{/* Filters Panel */}
-				{showFilters && (
-					<FilterPanel
-						onFilterChange={setFilter}
-						availableTrackers={availableTrackers}
-						availableEvents={availableEvents}
-					/>
-				)}
+				{/* Main Content - Blurred when disabled */}
+				<div className={`${!isPluginEnabled ? 'blur-sm pointer-events-none' : ''}`}>
+					{/* Filters Panel */}
+					{showFilters && (
+						<FilterPanel
+							onFilterChange={setFilter}
+							availableTrackers={availableTrackers}
+							availableEvents={availableEvents}
+						/>
+					)}
 
-				{/* Debug Panel */}
+					{/* Debug Panel */}
 				{showDebugPanel && (
 					<div className="mx-3 mb-3 p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
 						<div className="flex items-center justify-between mb-3">
@@ -1056,13 +1093,14 @@ export default function Popup() {
 					)}
 				</div>
 
-				{/* Login Form */}
-				<LoginForm onLoginSuccess={handleLoginSuccess} />
+					{/* Login Form */}
+					<LoginForm onLoginSuccess={handleLoginSuccess} />
 
-				{/* Debug Panel */}
-				{settings.debugMode && (
-					<DebugPanel events={filteredAllEvents} />
-				)}
+					{/* Debug Panel */}
+					{settings.debugMode && (
+						<DebugPanel events={filteredAllEvents} />
+					)}
+				</div>
 			</div>
 		</ErrorBoundary>
 	);
