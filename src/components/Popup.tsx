@@ -206,8 +206,8 @@ export default function Popup() {
 					if (!trackerGroups.has(trackerName)) {
 						trackerGroups.set(trackerName, {
 							name: trackerName,
-							nameID: "Tracker ID", 
-							image: "/icons/other-tracker.svg",
+					nameID: "Tracker ID",
+					image: "/icons/other-tracker.svg",
 							id: event.id || "tracker_id",
 							items: []
 						});
@@ -240,6 +240,22 @@ export default function Popup() {
 				// Initialize theme
 				await ThemeManager.initializeTheme();
 				
+				// Load existing authentication
+				const authData = await chrome.storage.local.get(['eventrich_auth']);
+				if (authData.eventrich_auth) {
+					const auth = authData.eventrich_auth;
+					// Check if token is not expired (30 days)
+					const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+					if (auth.timestamp && (Date.now() - auth.timestamp) < thirtyDaysInMs) {
+						setUserData(auth.user);
+						setIsLoggedIn(true);
+						console.log("User auto-logged in:", auth.user);
+					} else {
+						// Token expired, clear storage
+						await chrome.storage.local.remove(['eventrich_auth']);
+					}
+				}
+				
 				// Load user settings
 				const userSettings = await StorageManager.getSettings();
 				setSettings(userSettings);
@@ -269,15 +285,32 @@ export default function Popup() {
 	}, []);
 
 	// Handle login success
-	const handleLoginSuccess = useCallback((response: LoginResponse) => {
-		setUserData(response.user);
+	const handleLoginSuccess = useCallback((response: any) => {
+		setUserData(response.data.user);
 		setIsLoggedIn(true);
 		setShowLoginModal(false);
 		
 		// Log successful login
-		AuditLogger.log('user_login', { userId: response.user?.id, email: response.user?.email });
-		NotificationManager.success('Login Successful', `Welcome back, ${response.user.name}!`);
-		console.log("User logged in successfully:", response.user);
+		AuditLogger.log('user_login', { 
+			userId: response.data.user?.id, 
+			email: response.data.user?.email,
+			credits: response.data.user?.credits,
+			subscription: response.data.user?.subscription_status?.plan
+		});
+		NotificationManager.success('Login Successful', `Welcome back, ${response.data.user.name}! Credits: ${response.data.user.credits}`);
+		console.log("User logged in successfully:", response.data.user);
+	}, []);
+
+	// Handle logout
+	const handleLogout = useCallback(async () => {
+		await chrome.storage.local.remove(['eventrich_auth']);
+		setUserData(null);
+		setIsLoggedIn(false);
+		
+		// Log logout
+		AuditLogger.log('user_logout', { timestamp: new Date().toISOString() });
+		NotificationManager.info('Logged Out', 'You have been logged out successfully');
+		console.log("User logged out");
 	}, []);
 
 	useEffect(() => {
@@ -820,16 +853,23 @@ export default function Popup() {
 							<div className="w-2 h-2 bg-green-500 rounded-full" title="Plugin is active" />
 						)}
 						<button
-							onClick={() => setShowLoginModal(true)}
+							onClick={() => !isLoggedIn && setShowLoginModal(true)}
+							onContextMenu={(e) => {
+								e.preventDefault();
+								if (isLoggedIn) {
+									handleLogout();
+								}
+							}}
 							className={`
 								flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
 								border border-gray-200 dark:border-gray-600
 								${isLoggedIn 
 									? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600' 
-									: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+									: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer'
 								}
+								${isLoggedIn ? 'cursor-default' : 'cursor-pointer'}
 							`}
-							title={isLoggedIn ? `Logged in as ${userData?.name || 'User'}` : "Login to EventRICH.AI"}
+							title={isLoggedIn ? `Logged in as ${userData?.name || userData?.email} | Credits: ${userData?.credits || 0} | Plan: ${userData?.subscription_status?.plan || 'Free'} | Right-click to logout` : "Login to EventRICH.AI"}
 						>
 							<User className="h-4 w-4" />
 						</button>
@@ -926,14 +966,14 @@ export default function Popup() {
 
 				{/* Main Content - Blurred when disabled */}
 				<div className={`bg-white dark:bg-gray-900 ${!isPluginEnabled ? 'blur-sm pointer-events-none' : ''}`}>
-					{/* Filters Panel */}
-					{showFilters && (
-						<FilterPanel
-							onFilterChange={setFilter}
-							availableTrackers={availableTrackers}
-							availableEvents={availableEvents}
-						/>
-					)}
+				{/* Filters Panel */}
+				{showFilters && (
+					<FilterPanel
+						onFilterChange={setFilter}
+						availableTrackers={availableTrackers}
+						availableEvents={availableEvents}
+					/>
+				)}
 
 					{/* Debug Panel */}
 				{showDebugPanel && (
@@ -1165,11 +1205,11 @@ export default function Popup() {
 					)}
 				</div>
 
-					{/* Debug Panel */}
-					{settings.debugMode && (
-						<DebugPanel events={filteredAllEvents} />
-					)}
-				</div>
+				{/* Debug Panel */}
+				{settings.debugMode && (
+					<DebugPanel events={filteredAllEvents} />
+				)}
+			</div>
 			</div>
 
 			{/* Login Modal */}

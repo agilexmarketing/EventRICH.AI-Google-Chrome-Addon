@@ -23,26 +23,71 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		setError('');
 
 		try {
-			const response = await fetch('https://dash.eventrich.ai/api/auth/login', {
+			// Generate device ID if not exists
+			let deviceId: string;
+			const storedDeviceId = await chrome.storage.local.get(['eventrich_device_id']);
+			if (storedDeviceId.eventrich_device_id) {
+				deviceId = storedDeviceId.eventrich_device_id;
+			} else {
+				deviceId = 'chrome_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+				await chrome.storage.local.set({ eventrich_device_id: deviceId });
+			}
+
+			// Get addon version from manifest
+			const manifest = chrome.runtime.getManifest();
+			const addonVersion = manifest.version || '1.0.0';
+
+			const response = await fetch('https://dash.eventrich.ai/applications/google_chrome_addon/login.php', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email, password }),
+				body: JSON.stringify({ 
+					email, 
+					password,
+					addon_version: addonVersion,
+					device_id: deviceId
+				}),
 			});
 
 			const data = await response.json();
 
 			if (response.ok && data.success) {
+				// Store authentication data
+				await chrome.storage.local.set({
+					eventrich_auth: {
+						token: data.data.user.api_token,
+						user: data.data.user,
+						config: data.data.addon_config,
+						timestamp: Date.now()
+					}
+				});
+
 				onLoginSuccess(data);
 				setEmail('');
 				setPassword('');
 				onClose();
 			} else {
-				setError(data.message || 'Login failed. Please check your credentials.');
+				// Handle specific error codes
+				switch (response.status) {
+					case 400:
+						setError(data.error || 'Invalid data provided. Please check your input.');
+						break;
+					case 401:
+						setError('Invalid email or password. Please try again.');
+						break;
+					case 403:
+						setError('Your account has been deactivated. Please contact support.');
+						break;
+					case 500:
+						setError('Server error. Please try again later.');
+						break;
+					default:
+						setError(data.error || 'Login failed. Please check your credentials.');
+				}
 			}
 		} catch (error) {
-			setError('Network error. Please try again.');
+			setError('Network error. Please check your connection and try again.');
 			console.error('Login error:', error);
 		} finally {
 			setIsLoading(false);
@@ -113,9 +158,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 								<div className="relative">
 									<input
 										type={showPassword ? "text" : "password"}
-										placeholder="Enter your password"
+										placeholder="Enter your password (min. 6 characters)"
 										value={password}
 										onChange={(e) => setPassword(e.target.value)}
+										minLength={6}
 										className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 										required
 									/>
