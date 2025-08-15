@@ -237,15 +237,15 @@ const init = async () => {
 
 				// Use the new TrackerDetector for streamlined detection
 				let requestBody: string | undefined;
-				if (data.requestBody && data.requestBody.raw) {
-					const decoder = new TextDecoder("utf-8");
+						if (data.requestBody && data.requestBody.raw) {
+							const decoder = new TextDecoder("utf-8");
 					requestBody = data.requestBody.raw[0]
-						? decoder.decode(data.requestBody.raw[0].bytes)
+								? decoder.decode(data.requestBody.raw[0].bytes)
 						: undefined;
 				}
 
 				const context: TrackerDetectionContext = {
-					url: data.url,
+								url: data.url,
 					method: data.method || 'GET',
 					requestBody,
 					currentTabId
@@ -254,7 +254,7 @@ const init = async () => {
 				// Special handling for GTM events in other tracker domains
 				if (requestBody && context.url.includes("doubleclick.net") || context.url.includes("googlesyndication.com")) {
 					try {
-						const parsedBody = JSON.parse(requestBody);
+								const parsedBody = JSON.parse(requestBody);
 						if (isGTMEvent(parsedBody)) {
 							// Force GTM detection for this request
 							context.url = "googletagmanager.com/gtm"; // Override URL pattern for GTM detection
@@ -284,9 +284,9 @@ const init = async () => {
 						// Create the new event
 						const newEvent = {
 							name: extractedData.eventName || getDefaultEventName(rule.name),
-							parameters: categorizedParams,
+								parameters: categorizedParams,
 							id: extractedData.trackerId || getDefaultTrackerId(rule.name, data.url),
-							url: data.url,
+								url: data.url,
 							timestamp: new Date()
 						};
 
@@ -299,7 +299,7 @@ const init = async () => {
 						// Update badge
 						await updateBadge();
 
-						console.log(`${rule.name} tracker detected:`, newEvent);
+						// ${rule.name} tracker detected
 					}
 				);
 
@@ -335,10 +335,8 @@ const init = async () => {
 				// End performance monitoring
 				const duration = PerformanceMonitor.endMeasurement(`request_${data.requestId}`);
 				
-				// Log slow requests
-				if (duration > 100) {
-					console.warn(`Slow request processing: ${duration}ms for ${data.url}`);
-				}
+				// Performance monitoring (no console spam)
+				// Duration: ${duration}ms for ${data.url}
 
 				} catch (error) {
 					ErrorHandler.logError(error as Error, `Request processing failed for ${data.url}`);
