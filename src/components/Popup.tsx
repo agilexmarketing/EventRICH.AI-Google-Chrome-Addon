@@ -833,12 +833,17 @@ export default function Popup() {
 		const hasFilters = showFilters;
 		const hasDebugPanel = showDebugPanel;
 		const hasScriptExtractor = showScriptExtractor;
+		const hasLoginModal = showLoginModal;
 
 		// Base classes
 		let classes = "popup-container transition-all duration-300 ease-in-out";
 
+		// Login modal takes priority - needs maximum space
+		if (hasLoginModal) {
+			classes += " login-modal-container";
+		}
 		// Determine size based on content
-		if (totalTrackers === 0) {
+		else if (totalTrackers === 0) {
 			classes += " no-events-container";
 		} else if (totalTrackers === 1 && !hasExpandedItems && !hasFilters && !hasDebugPanel && !hasScriptExtractor) {
 			classes += " single-tracker-container";
