@@ -125,7 +125,8 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
 			"clarity.ms",
-			"www.clarity.ms/tag",
+			"m.clarity.ms",
+			"www.clarity.ms",
 			"scripts.clarity.ms"
 		],
 		description: "Microsoft Clarity session recording and analytics",
@@ -176,12 +177,14 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
 			"klaviyo.com",
+			"www.klaviyo.com",
 			"static.klaviyo.com",
 			"static-tracking.klaviyo.com",
 			"static-forms.klaviyo.com",
 			"a.klaviyo.com",
 			"static.klaviyo.com/onsite/js",
 			"klaviyo.js",
+			"klaviyo_subscribe.js",
 			"in_app_forms",
 			"signup_forms",
 			"onsite-triggering",
@@ -260,8 +263,8 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		],
 		description: "Taboola content recommendation and advertising",
 		extractors: {
-			eventName: ["name", "event"],
-			trackerId: ["id", "user-id"]
+			eventName: ["name", "event", "en"],
+			trackerId: ["id", "user-id", "tim", "pubit"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
@@ -362,7 +365,7 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		description: "LeadsRX attribution and analytics",
 		extractors: {
 			eventName: ["event"],
-			trackerId: ["_lab", "wjshxq43604"]
+			trackerId: ["_lab", "acctTag", "wjshxq43604"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
