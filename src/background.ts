@@ -91,8 +91,17 @@ const updateBadge = async () => {
 	if (googleAdsEvents.length > 0) trackerCount++;
 	if (metaEvents.length > 0) trackerCount++;
 	if (tikTokEvents.length > 0) trackerCount++;
-	if (otherTrackersEvents.length > 0) trackerCount++;
 	if (gtmEvents.length > 0) trackerCount++;
+	
+	// Count other trackers by unique tracker names (same logic as popup)
+	if (otherTrackersEvents.length > 0) {
+		const uniqueTrackerNames = new Set();
+		otherTrackersEvents.forEach((event: any) => {
+			const trackerName = event.trackerName || event.name || "UnknownEvent";
+			uniqueTrackerNames.add(trackerName);
+		});
+		trackerCount += uniqueTrackerNames.size;
+	}
 
 	// Set the badge text with the count of trackers
 	(chrome as unknown as ChromeAction).action.setBadgeText({
