@@ -768,7 +768,7 @@ export default function Popup() {
 
 	return (
 		<ErrorBoundary>
-			<div className={`w-[450px] flex flex-col bg-white dark:bg-gray-900 relative ${getContainerClasses()}`}>
+			<div className={`w-[480px] flex flex-col bg-white dark:bg-gray-900 relative ${getContainerClasses()}`}>
 				<NotificationCenter />
 				
 				{/* Plugin Disabled Overlay */}

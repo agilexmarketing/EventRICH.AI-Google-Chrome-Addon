@@ -129,8 +129,8 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 	return (
 		<div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800">
 			<form onSubmit={handleLogin} className="space-y-2">
-				<div className="flex gap-2">
-					<div className="flex-1">
+				<div className="flex gap-1.5">
+					<div className="flex-1 min-w-0">
 						<input
 							type="email"
 							placeholder="Email"
@@ -141,7 +141,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 						/>
 					</div>
 					
-					<div className="flex-1 relative">
+					<div className="flex-1 min-w-0 relative">
 						<input
 							type={showPassword ? "text" : "password"}
 							placeholder="Password"
@@ -166,7 +166,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 					<button
 						type="submit"
 						disabled={isLoading}
-						className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-md transition-colors duration-200 whitespace-nowrap"
+						className="flex items-center justify-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-md transition-colors duration-200 whitespace-nowrap shrink-0"
 					>
 						{isLoading ? (
 							<div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
