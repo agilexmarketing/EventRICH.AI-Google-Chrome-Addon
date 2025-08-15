@@ -12,7 +12,7 @@
 	"action": {
 		"default_title": "EventRICH.AI Tracker & Conversion Inspector",
 		"default_icon": "favicon-32x32.png",
-		"default_popup": "test-popup.html"
+		"default_popup": "popup.html"
 	},
 	"host_permissions": ["*://*/*"],
 	"background": {
@@ -26,7 +26,7 @@
 		}
 	],
 	"content_security_policy": {
-		"extension_pages": "script-src 'self'; object-src 'self'; frame-ancestors 'none';"
+		"extension_pages": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'self'; frame-ancestors 'none';"
 	},
 	"homepage_url": "https://eventrich.ai",
 	"commands": {

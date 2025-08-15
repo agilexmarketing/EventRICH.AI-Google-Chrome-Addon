@@ -28,14 +28,9 @@ const initialize = async () => {
 			const root = createRoot(container);
 			console.log('EventRICH.AI: React root created, rendering components...');
 			
-			// Test with minimal component first
 			root.render(
 				<ErrorBoundary>
-					<div style={{ padding: '20px', minHeight: '200px', backgroundColor: '#f0f0f0' }}>
-						<h1>EventRICH.AI Test</h1>
-						<p>If you see this, React is working!</p>
-						<Popup />
-					</div>
+					<Popup />
 				</ErrorBoundary>
 			);
 			console.log('EventRICH.AI: React render called');
