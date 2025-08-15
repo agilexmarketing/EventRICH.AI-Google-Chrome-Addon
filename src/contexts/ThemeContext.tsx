@@ -14,6 +14,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
+	console.log('[ThemeProvider] Component rendered');
 	const [theme, setThemeState] = useState<ThemeMode>(ThemeMode.SYSTEM);
 	const [isDark, setIsDark] = useState(false);
 
@@ -28,7 +29,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 			// Calculate if dark mode should be active
 			const shouldBeDark = calculateIsDark(currentTheme);
 			setIsDark(shouldBeDark);
-			console.log('[ThemeProvider] Is dark mode:', shouldBeDark);
+			console.log('[ThemeProvider] Initial state set:', { theme: currentTheme, isDark: shouldBeDark });
 		};
 		
 		loadTheme();
@@ -44,18 +45,25 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
 	// Update theme
 	const setTheme = async (newTheme: ThemeMode) => {
-		console.log('[ThemeProvider] Setting theme to:', newTheme);
+		console.log('[ThemeProvider] setTheme called with:', newTheme);
+		console.log('[ThemeProvider] Current state before change:', { theme, isDark });
+		
 		setThemeState(newTheme);
 		
 		// Calculate if dark mode should be active
 		const shouldBeDark = calculateIsDark(newTheme);
 		setIsDark(shouldBeDark);
 		
-		// Apply to DOM and save to storage
-		await ThemeManager.setTheme(newTheme);
-		ThemeManager.applyTheme(newTheme);
+		console.log('[ThemeProvider] State updated to:', { theme: newTheme, isDark: shouldBeDark });
 		
-		console.log('[ThemeProvider] Theme updated, isDark:', shouldBeDark);
+		// Apply to DOM and save to storage
+		try {
+			await ThemeManager.setTheme(newTheme);
+			ThemeManager.applyTheme(newTheme);
+			console.log('[ThemeProvider] Theme applied to DOM and saved');
+		} catch (error) {
+			console.error('[ThemeProvider] Error applying theme:', error);
+		}
 	};
 
 	// Listen for system theme changes
@@ -89,9 +97,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 }
 
 export function useTheme(): ThemeContextType {
+	console.log('[useTheme] Hook called');
 	const context = useContext(ThemeContext);
 	if (context === undefined) {
+		console.error('[useTheme] Context is undefined - ThemeProvider not found!');
 		throw new Error('useTheme must be used within a ThemeProvider');
 	}
+	console.log('[useTheme] Context found:', { theme: context.theme, isDark: context.isDark });
 	return context;
 }
