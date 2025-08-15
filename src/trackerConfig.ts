@@ -177,12 +177,17 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		urlPatterns: [
 			"klaviyo.com",
 			"static.klaviyo.com",
-			"static-tracking.klaviyo.com"
+			"static-tracking.klaviyo.com",
+			"static.klaviyo.com/onsite/js",
+			"klaviyo.js",
+			"in_app_forms",
+			"signup_forms",
+			"onsite-triggering"
 		],
 		description: "Klaviyo email marketing and customer analytics",
 		extractors: {
-			eventName: ["event", "track"],
-			trackerId: ["company_id", "token"]
+			eventName: ["event", "track", "type"],
+			trackerId: ["company_id", "token", "cb"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
