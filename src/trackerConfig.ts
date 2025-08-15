@@ -161,6 +161,7 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		urlPatterns: [
 			"visualwebsiteoptimizer.com",
 			"dev.visualwebsiteoptimizer.com",
+			"vwo.com",
 			"vwo"
 		],
 		description: "VWO A/B testing and optimization platform",
@@ -400,8 +401,8 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		],
 		description: "Mountain performance marketing analytics",
 		extractors: {
-			eventName: ["event"],
-			trackerId: ["shaid", "dxver"]
+			eventName: ["event", "evt"],
+			trackerId: ["shaid", "dxver", "ga_tracking_id"]
 		},
 		dictionary: [],
 		supportsRequestBody: true,
@@ -997,11 +998,15 @@ export class TrackerDetector {
 	 * Check if a URL matches any tracker detection rules
 	 */
 	static findMatchingRule(url: string): TrackerDetectionRule | null {
+		console.log('EventRICH.AI: Checking URL for matches:', url);
 		for (const rule of TRACKER_DETECTION_RULES) {
-			if (rule.urlPatterns.some(pattern => url.includes(pattern))) {
+			const isMatch = rule.urlPatterns.some(pattern => url.includes(pattern));
+			if (isMatch) {
+				console.log('EventRICH.AI: URL matched rule:', rule.name, 'patterns:', rule.urlPatterns);
 				return rule;
 			}
 		}
+		console.log('EventRICH.AI: No rule matched for URL:', url);
 		return null;
 	}
 

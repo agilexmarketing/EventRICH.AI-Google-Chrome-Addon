@@ -12,6 +12,23 @@ export default defineConfig({
 		path: path.resolve(__dirname, "dist"),
 		filename: "[name].js",
 	},
+	performance: {
+		hints: false, // Disable performance warnings for Chrome extension
+		maxAssetSize: 1000000, // 1MB
+		maxEntrypointSize: 1000000, // 1MB
+	},
+	optimization: {
+		splitChunks: {
+			chunks: 'all',
+			cacheGroups: {
+				vendor: {
+					test: /[\\/]node_modules[\\/]/,
+					name: 'vendors',
+					chunks: 'all',
+				},
+			},
+		},
+	},
 	resolve: {
 		extensions: [".tsx", ".ts", ".js"],
 	},
