@@ -91,7 +91,6 @@ export default function Popup() {
 	const [showScriptExtractor, setShowScriptExtractor] = useState(false);
 	const [extractedScripts, setExtractedScripts] = useState<{ source: string; content: string; type: string }[]>([]);
 	const [scriptsLoading, setScriptsLoading] = useState(false);
-	const [selectedScript, setSelectedScript] = useState<string>("");
 	const [scriptsCopied, setScriptsCopied] = useState(false);
 
 
@@ -570,27 +569,7 @@ export default function Popup() {
 		}
 	};
 
-	const handleCopySelectedScript = async () => {
-		if (!selectedScript) {
-			NotificationManager.warning('No Selection', 'Please select a script to copy');
-			return;
-		}
 
-		try {
-			const script = extractedScripts.find(s => s.source === selectedScript);
-			if (script) {
-				const copyContent = `// Script Source: ${script.source}\n// Type: ${script.type}\n// Extracted by EventRICH.AI Chrome Extension\n\n${script.content}`;
-				await navigator.clipboard.writeText(copyContent);
-				setScriptsCopied(true);
-				setTimeout(() => setScriptsCopied(false), 2000);
-				
-				NotificationManager.success('Copied!', 'Script content copied to clipboard');
-			}
-		} catch (error) {
-			console.error('Failed to copy script:', error);
-			NotificationManager.error('Copy Failed', 'Could not copy script to clipboard');
-		}
-	};
 
 	const handleCopyAllScripts = async () => {
 		if (extractedScripts.length === 0) {
@@ -852,28 +831,10 @@ export default function Popup() {
 								</h3>
 							</div>
 							<div className="flex items-center gap-2">
-								{extractedScripts.length > 0 && (
-									<button
-										onClick={handleCopyAllScripts}
-										className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60 rounded transition-colors"
-									>
-										{scriptsCopied ? (
-											<>
-												<Check className="h-3 w-3" />
-												Copied!
-											</>
-										) : (
-											<>
-												<Copy className="h-3 w-3" />
-												Copy All
-											</>
-										)}
-									</button>
-								)}
 								<button
 									onClick={extractScriptsFromPage}
 									disabled={scriptsLoading}
-									className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-600 dark:bg-orange-700 text-white hover:bg-orange-700 dark:hover:bg-orange-600 rounded transition-colors disabled:opacity-50"
+									className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-600 dark:bg-orange-700 text-white hover:bg-orange-700 dark:hover:bg-orange-600 rounded transition-colors disabled:opacity-50 border border-orange-500"
 								>
 									{scriptsLoading ? (
 										<>
@@ -891,56 +852,43 @@ export default function Popup() {
 						</div>
 						
 						{extractedScripts.length > 0 && (
-							<>
-								<div className="mb-3">
-									<label className="block text-xs font-medium text-orange-800 dark:text-orange-200 mb-1">
-										Select script to copy ({extractedScripts.length} found):
-									</label>
-									<select
-										value={selectedScript}
-										onChange={(e) => setSelectedScript(e.target.value)}
-										className="w-full text-xs p-2 border border-orange-200 dark:border-orange-700 rounded bg-white dark:bg-orange-950/40 text-orange-900 dark:text-orange-100"
+							<div className="mb-3">
+								<div className="flex items-center justify-between mb-2">
+									<span className="text-xs font-medium text-orange-800 dark:text-orange-200">
+										All Scripts ({extractedScripts.length} found):
+									</span>
+									<button
+										onClick={handleCopyAllScripts}
+										className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60 rounded transition-colors"
 									>
-										<option value="">Choose a script...</option>
-										{extractedScripts.map((script, index) => (
-											<option key={index} value={script.source}>
-												{script.type === 'external' ? '🔗' : script.type === 'iframe-blocked' ? '🚫' : '📄'} {script.source}
-											</option>
-										))}
-									</select>
+										{scriptsCopied ? (
+											<>
+												<Check className="h-3 w-3" />
+												Copied!
+											</>
+										) : (
+											<>
+												<Copy className="h-3 w-3" />
+												Copy All Scripts
+											</>
+										)}
+									</button>
 								</div>
-								
-								{selectedScript && (
-									<div className="mb-3">
-										<div className="flex items-center justify-between mb-2">
-											<span className="text-xs font-medium text-orange-800 dark:text-orange-200">
-												Script Preview:
-											</span>
-											<button
-												onClick={handleCopySelectedScript}
-												className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60 rounded transition-colors"
-											>
-												{scriptsCopied ? (
-													<>
-														<Check className="h-3 w-3" />
-														Copied!
-													</>
-												) : (
-													<>
-														<Copy className="h-3 w-3" />
-														Copy Selected
-													</>
-												)}
-											</button>
-										</div>
-										<div className="max-h-48 overflow-y-auto">
-											<pre className="text-xs text-orange-800 dark:text-orange-200 whitespace-pre-wrap break-words bg-white dark:bg-orange-950/40 p-2 rounded border border-orange-200 dark:border-orange-700">
-												{extractedScripts.find(s => s.source === selectedScript)?.content || ''}
-											</pre>
-										</div>
-									</div>
-								)}
-							</>
+								<div className="relative">
+									<textarea
+										value={extractedScripts.map((script, index) => 
+											`// ========== SCRIPT ${index + 1} ==========\n` +
+											`// Source: ${script.source}\n` +
+											`// Type: ${script.type}\n` +
+											`// Extracted by EventRICH.AI Chrome Extension\n\n` +
+											`${script.content}\n\n`
+										).join('\n')}
+										readOnly
+										className="w-full h-64 text-xs text-orange-800 dark:text-orange-200 bg-white dark:bg-orange-950/40 p-3 rounded border border-orange-200 dark:border-orange-700 font-mono resize-none"
+										placeholder="Extracted scripts will appear here..."
+									/>
+								</div>
+							</div>
 						)}
 						
 						<div className="text-xs text-orange-600 dark:text-orange-400">
