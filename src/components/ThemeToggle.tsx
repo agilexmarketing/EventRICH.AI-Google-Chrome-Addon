@@ -1,24 +1,15 @@
 import { Moon, Sun, Monitor } from "lucide-react";
-import { useState, useEffect } from "react";
-import { ThemeMode, ThemeManager } from "../utils";
+import { ThemeMode } from "../utils";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface ThemeToggleProps {
 	className?: string;
 }
 
 export default function ThemeToggle({ className }: ThemeToggleProps) {
-	const [theme, setTheme] = useState<ThemeMode>(ThemeMode.SYSTEM);
-
-	useEffect(() => {
-		const loadTheme = async () => {
-			const currentTheme = await ThemeManager.getThemeAsync();
-			setTheme(currentTheme);
-		};
-		loadTheme();
-	}, []);
+	const { theme, setTheme } = useTheme();
 
 	const cycleTheme = async () => {
-		console.log('[ThemeToggle] Current theme:', theme);
 		let nextTheme: ThemeMode;
 		
 		switch (theme) {
@@ -35,14 +26,7 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 				nextTheme = ThemeMode.LIGHT;
 		}
 		
-		console.log('[ThemeToggle] Cycling to theme:', nextTheme);
-		setTheme(nextTheme);
-		await ThemeManager.setTheme(nextTheme);
-		console.log('[ThemeToggle] Theme set in storage');
-		
-		// Force immediate theme application
-		ThemeManager.applyTheme(nextTheme);
-		console.log('[ThemeToggle] Theme applied to DOM');
+		await setTheme(nextTheme);
 	};
 
 	const getCurrentIcon = () => {

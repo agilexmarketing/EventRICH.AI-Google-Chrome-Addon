@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import "./styles/global.css";
 import Popup from "./components/Popup";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { ThemeManager, ErrorHandler, AuditLogger } from "./utils";
 
 // Initialize theme and utilities before mounting
@@ -27,7 +28,9 @@ const initialize = async () => {
 			const root = createRoot(container);
 			root.render(
 				<ErrorBoundary>
-					<Popup />
+					<ThemeProvider>
+						<Popup />
+					</ThemeProvider>
 				</ErrorBoundary>
 			);
 		} else {

@@ -19,6 +19,7 @@ import {
 	AuditLogger,
 	PerformanceMonitor
 } from "../utils";
+import { useTheme } from "../contexts/ThemeContext";
 import DataItem from "./DataItem";
 import LoginForm from "./LoginForm";
 import ThemeToggle from "./ThemeToggle";
@@ -31,6 +32,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import PluginToggle from "./PluginToggle";
 
 export default function Popup() {
+	const { isDark } = useTheme(); // Add theme awareness
 	const [currentUrl, setCurrentUrl] = useState("");
 	const [isPluginEnabled, setIsPluginEnabled] = useState<boolean>(true);
 	const [isLoadingPluginState, setIsLoadingPluginState] = useState<boolean>(true);
