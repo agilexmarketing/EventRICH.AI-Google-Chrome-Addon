@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "EventRICH.AI Tracker & Conversion Inspector",
-	"description": "Real-time analytics & pixel debugger for marketers and developers. Track EventRICH.AI, Google Analytics, Meta, TikTok and other tracking pixels with detailed event analysis.",
+	"description": "Real-time pixel tracker & analytics debugger. Track EventRICH.AI, Google Analytics, Meta, TikTok and more.",
 	"version": "2.1.0",
 	"icons": {
 		"16": "favicon-16x16.png",
