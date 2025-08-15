@@ -116,6 +116,374 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		requestBodyParsers: []
 	},
 	{
+		name: "Microsoft Clarity",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"clarity.ms",
+			"www.clarity.ms/tag",
+			"scripts.clarity.ms"
+		],
+		description: "Microsoft Clarity session recording and analytics",
+		extractors: {
+			eventName: ["event", "type"],
+			trackerId: ["project", "tag"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Hotjar",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"hotjar.com",
+			"static.hotjar.com",
+			"script.hotjar.com"
+		],
+		description: "Hotjar session recording and heatmaps",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["sv", "site_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "VWO",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"visualwebsiteoptimizer.com",
+			"dev.visualwebsiteoptimizer.com",
+			"vwo"
+		],
+		description: "VWO A/B testing and optimization platform",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["account_id", "a"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Klaviyo",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"klaviyo.com",
+			"static.klaviyo.com",
+			"static-tracking.klaviyo.com"
+		],
+		description: "Klaviyo email marketing and customer analytics",
+		extractors: {
+			eventName: ["event", "track"],
+			trackerId: ["company_id", "token"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Amplitude",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"amplitude.com",
+			"cdn.amplitude.com",
+			"api.amplitude.com"
+		],
+		description: "Amplitude product analytics",
+		extractors: {
+			eventName: ["event_type", "event"],
+			trackerId: ["api_key", "user_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Twitter/X Ads",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"ads-twitter.com",
+			"static.ads-twitter.com",
+			"analytics.twitter.com"
+		],
+		description: "Twitter/X advertising pixel",
+		extractors: {
+			eventName: ["event", "tw_evt"],
+			trackerId: ["txn_id", "pixel_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Pinterest",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"pinit.min.js",
+			"pinterest.com/ct",
+			"analytics.pinterest.com"
+		],
+		description: "Pinterest conversion tracking",
+		extractors: {
+			eventName: ["event", "em"],
+			trackerId: ["tid", "pin_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Taboola",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"taboola.com",
+			"cdn.taboola.com",
+			"trc.taboola.com"
+		],
+		description: "Taboola content recommendation and advertising",
+		extractors: {
+			eventName: ["name", "event"],
+			trackerId: ["id", "user-id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Outbrain",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"outbrain.com",
+			"amplify.outbrain.com",
+			"widgets.outbrain.com"
+		],
+		description: "Outbrain content recommendation and advertising",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["mrkrid", "publisher_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Quantcast",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"quantserve.com",
+			"secure.quantserve.com",
+			"rules.quantcount.com"
+		],
+		description: "Quantcast audience measurement and advertising",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["p", "site_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Affirm",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"affirm.com",
+			"cdn1.affirm.com",
+			"api.affirm.com"
+		],
+		description: "Affirm payment financing analytics",
+		extractors: {
+			eventName: ["event", "type"],
+			trackerId: ["public_api_key", "merchant_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "ShareASale",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"shareasale.com",
+			"static.shareasale.com",
+			"www.dwin1.com"
+		],
+		description: "ShareASale affiliate marketing tracking",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["sasmid", "ssmtid", "merchantID"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "TriplePixel",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"config-security.com",
+			"api.config-security.com",
+			"TriplePixel"
+		],
+		description: "TriplePixel marketing analytics platform",
+		extractors: {
+			eventName: ["action", "event"],
+			trackerId: ["id", "host"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "LeadsRX",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"leadsrx.com",
+			"app.leadsrx.com"
+		],
+		description: "LeadsRX attribution and analytics",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["_lab", "wjshxq43604"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "The Offer",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"secureoffer.io",
+			"api.secureoffer.io",
+			"theoffer.io"
+		],
+		description: "The Offer conversion tracking",
+		extractors: {
+			eventName: ["e", "event"],
+			trackerId: ["s", "config"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Mountain",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"mountain.com",
+			"dx.mountain.com",
+			"px.mountain.com"
+		],
+		description: "Mountain performance marketing analytics",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["shaid", "dxver"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Shopify Analytics",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"monorail-edge.shopifysvc.com",
+			"trekkie.storefront",
+			"ShopifyAnalytics"
+		],
+		description: "Shopify native analytics and tracking",
+		extractors: {
+			eventName: ["event", "schema_id"],
+			trackerId: ["shop_id", "theme_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Rebuy Engine",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"rebuyengine.com",
+			"cdn.rebuyengine.com"
+		],
+		description: "Rebuy personalization and upsell engine",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["shop", "rebuy_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Attentive",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"attn.tv",
+			"cdn.attn.tv"
+		],
+		description: "Attentive SMS and email marketing",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["dtag", "source"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Curalate",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"curalate.com",
+			"cdn.curalate.com"
+		],
+		description: "Curalate visual commerce platform",
+		extractors: {
+			eventName: ["event", "pixel"],
+			trackerId: ["sitename", "crl8"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "USBrowserSpeed",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"usbrowserspeed.com",
+			"a.usbrowserspeed.com"
+		],
+		description: "USBrowserSpeed tracking service",
+		extractors: {
+			eventName: ["purpose"],
+			trackerId: ["pid", "client_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "CookieYes",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"cookieyes.com",
+			"cdn-cookieyes.com"
+		],
+		description: "CookieYes GDPR consent management",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["client_data", "config"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
 		name: "Other Trackers",
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
