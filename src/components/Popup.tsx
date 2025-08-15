@@ -191,31 +191,30 @@ export default function Popup() {
 					items: aggregatedEvents,
 				}));
 			} else if (eventName === Events.OTHER_TRACKERS_EVENTS) {
-				// Handle other trackers as an array
-				const otherTracker = {
-					name: latestEvent.name || "Other Tracker",
-					nameID: "Tracker ID",
-					image: "/icons/other-tracker.svg",
-					id: id || "tracker_id",
-					items: aggregatedEvents,
-				};
-
-				setOtherTrackers((prevTrackers) => {
-					// Check if this tracker already exists
-					const existingIndex = prevTrackers.findIndex(
-						(tracker) => tracker.id === otherTracker.id
-					);
-
-					if (existingIndex >= 0) {
-						// Update existing tracker
-						const updatedTrackers = [...prevTrackers];
-						updatedTrackers[existingIndex] = otherTracker;
-						return updatedTrackers;
-					} else {
-						// Add new tracker
-						return [...prevTrackers, otherTracker];
+				// Group events by tracker name from the detection rules
+				const trackerGroups = new Map();
+				
+				events.forEach((event: any) => {
+					const trackerName = event.trackerName || event.name || "UnknownEvent";
+					
+					if (!trackerGroups.has(trackerName)) {
+						trackerGroups.set(trackerName, {
+							name: trackerName,
+							nameID: "Tracker ID", 
+							image: "/icons/other-tracker.svg",
+							id: event.id || "tracker_id",
+							items: []
+						});
 					}
+					
+					trackerGroups.get(trackerName).items.push({
+						name: event.name,
+						parameters: event.parameters,
+						url: event.url,
+					});
 				});
+
+				setOtherTrackers(Array.from(trackerGroups.values()));
 			}
 		}
 	}, []);

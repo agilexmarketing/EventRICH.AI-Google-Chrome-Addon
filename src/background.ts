@@ -284,6 +284,7 @@ const init = async () => {
 						// Create the new event
 						const newEvent = {
 							name: extractedData.eventName || getDefaultEventName(rule.name),
+							trackerName: rule.name, // Add tracker name for proper grouping
 								parameters: categorizedParams,
 							id: extractedData.trackerId || getDefaultTrackerId(rule.name, data.url),
 								url: data.url,
