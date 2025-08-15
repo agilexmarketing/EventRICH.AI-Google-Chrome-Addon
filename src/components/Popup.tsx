@@ -914,7 +914,7 @@ export default function Popup() {
 								flex items-center justify-center p-1.5 rounded-md text-sm font-medium transition-all duration-200
 								border border-gray-200 dark:border-gray-600
 								${isLoggedIn 
-									? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600' 
+									? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 border-green-300 dark:border-green-600' 
 									: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer'
 								}
 								${isLoggedIn ? 'cursor-default' : 'cursor-pointer'}

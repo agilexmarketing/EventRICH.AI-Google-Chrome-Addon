@@ -203,3 +203,16 @@ body {
 .dark .bg-yellow-800 {
 	background-color: #92400e !important; /* yellow-800 */
 }
+
+/* User login icon contrast fixes */
+.text-green-800 {
+	color: #166534 !important; /* green-800 - dark text on light green background */
+}
+
+.dark .text-green-100 {
+	color: #dcfce7 !important; /* green-100 - light text on dark green background */
+}
+
+.dark .bg-green-800 {
+	background-color: #166534 !important; /* green-800 - solid dark green background */
+}
