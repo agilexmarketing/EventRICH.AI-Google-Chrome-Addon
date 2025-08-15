@@ -58,5 +58,10 @@ const initialize = async () => {
 	}
 };
 
-// Initialize the popup
-initialize();
+// Initialize the popup with debug logging
+console.log('EventRICH.AI: Starting popup initialization...');
+initialize().then(() => {
+	console.log('EventRICH.AI: Popup initialization completed');
+}).catch((error) => {
+	console.error('EventRICH.AI: Popup initialization failed:', error);
+});

@@ -402,7 +402,7 @@ export class PerformanceMonitor {
 	static endMeasurement(label: string): number {
 		const start = this.measurements.get(label);
 		if (!start) {
-			console.warn(`No measurement started for label: ${label}`);
+			// Silently return 0 for measurements that weren't started
 			return 0;
 		}
 		
