@@ -528,23 +528,49 @@ export default function Popup() {
 
 				{/* Main Content */}
 				<div className="flex flex-col max-h-[400px] overflow-y-auto">
-					{/* Create array of all visible trackers for alternating backgrounds */}
-					{[
-						filteredEventRichPixel.id ? filteredEventRichPixel : null,
-						filteredGoogleAnalytics.id ? filteredGoogleAnalytics : null,
-						filteredGoogleAds.id ? filteredGoogleAds : null,
-						filteredMeta.id ? filteredMeta : null,
-						filteredTikTok.id ? filteredTikTok : null,
-						filteredGoogleTagManager.id ? filteredGoogleTagManager : null,
-						...filteredOtherTrackers.filter(tracker => tracker.id)
-					].filter(Boolean).map((tracker, index) => (
-						<div 
-							key={`${tracker!.name}-${index}`}
-							className={`${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-800/30' : 'bg-white dark:bg-gray-900'}`}
-						>
-							<DataItem item={tracker!} />
-						</div>
-					))}
+					{/* Function to get consistent background color based on tracker name */}
+					{(() => {
+						const getTrackerBackgroundColor = (trackerName: string) => {
+							const colors = [
+								'bg-blue-50 dark:bg-blue-950/50',      // EventRICH.AI
+								'bg-green-50 dark:bg-green-950/50',    // Google Analytics
+								'bg-purple-50 dark:bg-purple-950/50',  // Google Ads
+								'bg-pink-50 dark:bg-pink-950/50',      // Meta
+								'bg-yellow-50 dark:bg-yellow-950/50',  // TikTok
+								'bg-indigo-50 dark:bg-indigo-950/50',  // Google Tag Manager
+								'bg-orange-50 dark:bg-orange-950/50',  // Others 1
+								'bg-teal-50 dark:bg-teal-950/50',      // Others 2
+								'bg-cyan-50 dark:bg-cyan-950/50',      // Others 3
+								'bg-red-50 dark:bg-red-950/50',       // Others 4
+							];
+							
+							// Generate consistent index based on tracker name
+							const nameHash = trackerName.split('').reduce((a, b) => {
+								a = ((a << 5) - a) + b.charCodeAt(0);
+								return a & a;
+							}, 0);
+							return colors[Math.abs(nameHash) % colors.length];
+						};
+
+						const visibleTrackers = [
+							filteredEventRichPixel.id ? filteredEventRichPixel : null,
+							filteredGoogleAnalytics.id ? filteredGoogleAnalytics : null,
+							filteredGoogleAds.id ? filteredGoogleAds : null,
+							filteredMeta.id ? filteredMeta : null,
+							filteredTikTok.id ? filteredTikTok : null,
+							filteredGoogleTagManager.id ? filteredGoogleTagManager : null,
+							...filteredOtherTrackers.filter(tracker => tracker.id)
+						].filter(Boolean);
+
+						return visibleTrackers.map((tracker, index) => (
+							<div 
+								key={`${tracker!.name}-${tracker!.id}`}
+								className={getTrackerBackgroundColor(tracker!.name)}
+							>
+								<DataItem item={tracker!} />
+							</div>
+						));
+					})()}
 					
 					{/* No Results Message */}
 					{hasAnyEvents && filteredAllEvents.length === 0 && (
