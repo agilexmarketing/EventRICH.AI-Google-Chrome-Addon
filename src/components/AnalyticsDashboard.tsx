@@ -88,14 +88,15 @@ export default function AnalyticsDashboard({ allTrackers, className }: Analytics
 			<button
 				onClick={() => setIsOpen(true)}
 				className={`
-					flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 
-					hover:text-blue-600 dark:hover:text-blue-400 transition-colors
+					flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+					bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
+					text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400
+					border border-gray-200 dark:border-gray-600
 					${className}
 				`}
 				title="View Analytics Dashboard"
 			>
 				<BarChart3 className="h-4 w-4" />
-				Analytics
 			</button>
 		);
 	}

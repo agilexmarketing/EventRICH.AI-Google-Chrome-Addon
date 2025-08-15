@@ -464,18 +464,18 @@ export default function Popup() {
 							<button
 								onClick={() => setShowFilters(!showFilters)}
 								className={`
-									flex items-center gap-1 px-2 py-1 text-xs font-medium transition-colors
+									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									border border-gray-200 dark:border-gray-600 relative
 									${showFilters 
-										? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
-										: 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
+										? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600' 
+										: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
 									}
 								`}
 								title="Toggle filters (Ctrl+F)"
 							>
-								<Search className="h-3 w-3" />
-								Filters
+								<Search className="h-4 w-4" />
 								{(filter.searchTerm || filter.tracker || filter.eventName || filter.dateRange) && (
-									<span className="bg-blue-500 text-white text-xs px-1 rounded-full">●</span>
+									<span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-2 h-2 rounded-full"></span>
 								)}
 							</button>
 						</div>
