@@ -445,6 +445,16 @@ export default function Popup() {
 			const currentTabId = await getCurrentTabId();
 			if (!currentTabId) {
 				NotificationManager.error('Error', 'Could not get current tab');
+				setScriptsLoading(false);
+				return;
+			}
+
+			console.log('Attempting to extract scripts from tab:', currentTabId);
+
+			// Check if chrome.scripting is available
+			if (!chrome.scripting) {
+				NotificationManager.error('Permission Error', 'Chrome scripting API not available. Please reload the extension.');
+				setScriptsLoading(false);
 				return;
 			}
 
@@ -452,66 +462,90 @@ export default function Popup() {
 			const results = await chrome.scripting.executeScript({
 				target: { tabId: currentTabId },
 				func: () => {
-					const scripts: { source: string; content: string; type: string }[] = [];
-					
-					// Helper function to extract scripts from a document
-					const extractFromDocument = (doc: Document, source: string) => {
-						const scriptElements = doc.querySelectorAll('script');
-						scriptElements.forEach((script, index) => {
-							let content = '';
-							let type = 'inline';
-							let scriptSource = `${source} - Script ${index + 1}`;
+					try {
+						const scripts: { source: string; content: string; type: string }[] = [];
+						
+						// Helper function to extract scripts from a document
+						const extractFromDocument = (doc: Document, source: string) => {
+							const scriptElements = doc.querySelectorAll('script');
+							console.log(`Found ${scriptElements.length} script elements in ${source}`);
 							
-							if (script.src) {
-								// External script
-								type = 'external';
-								content = `// External script source: ${script.src}\n// Cannot access content due to CORS restrictions`;
-								scriptSource = script.src;
-							} else if (script.textContent) {
-								// Inline script
-								content = script.textContent.trim();
-								type = 'inline';
-							}
-							
-							if (content) {
+							scriptElements.forEach((script, index) => {
+								let content = '';
+								let type = 'inline';
+								let scriptSource = `${source} - Script ${index + 1}`;
+								
+								if (script.src) {
+									// External script
+									type = 'external';
+									content = `// External script source: ${script.src}\n// Cannot access content due to CORS restrictions`;
+									scriptSource = script.src;
+								} else if (script.textContent) {
+									// Inline script
+									content = script.textContent.trim();
+									type = 'inline';
+								} else if (script.innerHTML) {
+									// Try innerHTML as fallback
+									content = script.innerHTML.trim();
+									type = 'inline';
+								}
+								
+								// Include scripts even if they have empty content for debugging
 								scripts.push({
 									source: scriptSource,
-									content,
+									content: content || '// Empty script or script with no accessible content',
 									type
+								});
+							});
+						};
+
+						// Extract from main document
+						console.log('Extracting from main document');
+						extractFromDocument(document, 'Main Page');
+						
+						// Extract from iframes (if accessible)
+						const iframes = document.querySelectorAll('iframe');
+						console.log(`Found ${iframes.length} iframes`);
+						
+						iframes.forEach((iframe, iframeIndex) => {
+							try {
+								if (iframe.contentDocument) {
+									extractFromDocument(
+										iframe.contentDocument, 
+										`Iframe ${iframeIndex + 1} (${iframe.src || 'same-origin'})`
+									);
+								} else {
+									// iframe not accessible, but still note it
+									scripts.push({
+										source: `Iframe ${iframeIndex + 1} (${iframe.src || 'cross-origin'})`,
+										content: `// Cannot access iframe content due to CORS restrictions\n// iframe src: ${iframe.src || 'no src attribute'}`,
+										type: 'iframe-blocked'
+									});
+								}
+							} catch (error) {
+								// iframe not accessible due to CORS
+								scripts.push({
+									source: `Iframe ${iframeIndex + 1} (${iframe.src || 'cross-origin'})`,
+									content: `// Cannot access iframe content due to CORS restrictions\n// iframe src: ${iframe.src || 'no src attribute'}\n// Error: ${error.message}`,
+									type: 'iframe-blocked'
 								});
 							}
 						});
-					};
 
-					// Extract from main document
-					extractFromDocument(document, 'Main Page');
-					
-					// Extract from iframes (if accessible)
-					const iframes = document.querySelectorAll('iframe');
-					iframes.forEach((iframe, iframeIndex) => {
-						try {
-							if (iframe.contentDocument) {
-								extractFromDocument(
-									iframe.contentDocument, 
-									`Iframe ${iframeIndex + 1} (${iframe.src || 'same-origin'})`
-								);
-							}
-						} catch (error) {
-							// iframe not accessible due to CORS
-							scripts.push({
-								source: `Iframe ${iframeIndex + 1} (${iframe.src || 'cross-origin'})`,
-								content: `// Cannot access iframe content due to CORS restrictions\n// iframe src: ${iframe.src || 'no src attribute'}`,
-								type: 'iframe-blocked'
-							});
-						}
-					});
-
-					return scripts;
+						console.log(`Total scripts extracted: ${scripts.length}`);
+						return scripts;
+					} catch (error) {
+						console.error('Error in content script:', error);
+						return [];
+					}
 				}
 			});
 
+			console.log('Script execution results:', results);
+
 			if (results && results[0] && results[0].result) {
 				const scripts = results[0].result;
+				console.log('Extracted scripts:', scripts);
 				setExtractedScripts(scripts);
 				
 				NotificationManager.success(
@@ -523,10 +557,13 @@ export default function Popup() {
 					scriptCount: scripts.length,
 					url: currentUrl 
 				});
+			} else {
+				console.log('No results from script execution');
+				NotificationManager.warning('No Scripts', 'No scripts found on this page or execution failed');
 			}
 		} catch (error) {
 			console.error('Failed to extract scripts:', error);
-			NotificationManager.error('Extraction Failed', 'Could not extract scripts from the page');
+			NotificationManager.error('Extraction Failed', `Could not extract scripts: ${error.message}`);
 			ErrorHandler.logError(error as Error, 'Script extraction');
 		} finally {
 			setScriptsLoading(false);
