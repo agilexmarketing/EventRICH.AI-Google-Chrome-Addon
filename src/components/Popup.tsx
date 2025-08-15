@@ -527,15 +527,23 @@ export default function Popup() {
 				)}
 
 				{/* Main Content */}
-				<div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto px-3 pb-3">
-					{filteredEventRichPixel.id && <DataItem item={filteredEventRichPixel} />}
-					{filteredGoogleAnalytics.id && <DataItem item={filteredGoogleAnalytics} />}
-					{filteredGoogleAds.id && <DataItem item={filteredGoogleAds} />}
-					{filteredMeta.id && <DataItem item={filteredMeta} />}
-					{filteredTikTok.id && <DataItem item={filteredTikTok} />}
-					{filteredGoogleTagManager.id && <DataItem item={filteredGoogleTagManager} />}
-					{filteredOtherTrackers.map((tracker, index) => (
-						tracker.id && <DataItem key={`${tracker.name}-${index}`} item={tracker} />
+				<div className="flex flex-col max-h-[400px] overflow-y-auto">
+					{/* Create array of all visible trackers for alternating backgrounds */}
+					{[
+						filteredEventRichPixel.id ? filteredEventRichPixel : null,
+						filteredGoogleAnalytics.id ? filteredGoogleAnalytics : null,
+						filteredGoogleAds.id ? filteredGoogleAds : null,
+						filteredMeta.id ? filteredMeta : null,
+						filteredTikTok.id ? filteredTikTok : null,
+						filteredGoogleTagManager.id ? filteredGoogleTagManager : null,
+						...filteredOtherTrackers.filter(tracker => tracker.id)
+					].filter(Boolean).map((tracker, index) => (
+						<div 
+							key={`${tracker!.name}-${index}`}
+							className={`${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-800/30' : 'bg-white dark:bg-gray-900'}`}
+						>
+							<DataItem item={tracker!} />
+						</div>
 					))}
 					
 					{/* No Results Message */}

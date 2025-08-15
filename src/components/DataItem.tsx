@@ -15,7 +15,7 @@ export default function DataItem({ item }: { item: SygnalDataItem }) {
 	const isExternalTracker = item.name !== "EventRICH.AI Pixel";
 
 	return (
-		<div className="border-t border-gray-200 dark:border-gray-700 pt-2 px-3 flex flex-col gap-1">
+		<div className="py-3 px-3 flex flex-col gap-1">
 			<div 
 				className="flex items-center justify-between gap-2 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-1 transition-colors duration-200"
 				onClick={() => totalEvents > 0 && setIsExpanded(!isExpanded)}
