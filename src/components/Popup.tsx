@@ -978,14 +978,29 @@ export default function Popup() {
 							<div>
 								Found tracking on <strong className="text-gray-900 dark:text-white">{currentUrl || "this website"}</strong>
 							</div>
-							<div className="text-xs text-gray-500 dark:text-gray-400">
-								{filteredAllEvents.length !== allEvents.length && (
-									<span>{filteredAllEvents.length} of {allEvents.length} events</span>
-								)}
-								{filteredAllEvents.length === allEvents.length && (
-									<span>{allEvents.length} events</span>
-								)}
-							</div>
+													<div className="text-xs text-gray-500 dark:text-gray-400">
+							{filteredAllEvents.length !== allEvents.length && (
+								<span>{filteredAllEvents.length} of {allEvents.length} events</span>
+							)}
+							{filteredAllEvents.length === allEvents.length && (
+								<span>{allEvents.length} events</span>
+							)}
+							{(() => {
+								const totalTrackers = [
+									filteredEventRichPixel.id ? 1 : 0,
+									filteredGoogleAnalytics.id ? 1 : 0,
+									filteredGoogleAds.id ? 1 : 0,
+									filteredMeta.id ? 1 : 0,
+									filteredTikTok.id ? 1 : 0,
+									filteredGoogleTagManager.id ? 1 : 0,
+									...filteredOtherTrackers.filter(t => t.id).map(() => 1)
+								].reduce((sum, count) => sum + count, 0);
+								
+								return totalTrackers > 0 && (
+									<span> • {totalTrackers} tracker{totalTrackers !== 1 ? 's' : ''}</span>
+								);
+							})()}
+						</div>
 						</div>
 					) : (
 						<div className="flex items-center justify-between">
