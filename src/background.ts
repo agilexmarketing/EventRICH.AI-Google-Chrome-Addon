@@ -1,16 +1,9 @@
 import {
-	gaDictionary,
-	gtmDictionary,
-	metaDictionary,
-	pixelDictionary,
-	tiktokDictionary,
-} from "./constants";
-import {
 	DictionaryItem,
 	Events,
 	SygnalDataEventCategoryParameter,
 } from "./types";
-
+import { TrackerDetector, TrackerDetectionContext, isGTMEvent } from "./trackerConfig";
 import { RateLimiter, PerformanceMonitor, ErrorHandler, AuditLogger } from "./utils";
 
 console.info("EventRICH.AI Background loaded.");
@@ -94,50 +87,7 @@ const updateBadge = async () => {
 	});
 };
 
-interface FlattenedObject {
-	[key: string]: string;
-}
 
-function flattenObjectFromTikTok(
-	obj: Record<string, unknown>,
-	parentKey = "",
-	result: FlattenedObject = {},
-): FlattenedObject {
-	for (const key in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, key)) {
-			// Construct new key based on parent key
-			const newKey = parentKey ? `${parentKey}_${key}` : key;
-
-			if (typeof obj[key] === "object" && obj[key] !== null) {
-				if (Array.isArray(obj[key])) {
-					// Handle arrays by flattening each item
-					obj[key].forEach((item, index) => {
-						if (typeof item === "object" && item !== null) {
-							flattenObjectFromTikTok(
-								item as Record<string, unknown>,
-								`${newKey}_${index}`,
-								result,
-							);
-						} else {
-							result[`${newKey}_${index}`] = `${item}`; // Ensure the value is a string
-						}
-					});
-				} else {
-					// Recursively flatten nested objects
-					flattenObjectFromTikTok(
-						obj[key] as Record<string, unknown>,
-						newKey,
-						result,
-					);
-				}
-			} else {
-				// Directly assign value if not an object
-				result[newKey] = `${obj[key]}`; // Ensure the value is a string
-			}
-		}
-	}
-	return result;
-}
 
 // Request deduplication helper
 const getCacheKey = (url: string, body?: string): string => {
@@ -262,515 +212,97 @@ const init = async () => {
 						return;
 					}
 
-				// Debug logging for EventRich.AI detection
-				if (data.url.includes("/e/") || data.url.includes("/i/")) {
-					const url = new URL(data.url);
-					const pathname = url.pathname;
+				// Use the new TrackerDetector for streamlined detection
+				let requestBody: string | undefined;
+				if (data.requestBody && data.requestBody.raw) {
+					const decoder = new TextDecoder("utf-8");
+					requestBody = data.requestBody.raw[0]
+						? decoder.decode(data.requestBody.raw[0].bytes)
+						: undefined;
+				}
 
-					if (pathname.includes("/e/")) {
-						console.log("EventRich.AI /e/ endpoint detected:", data.url);
-						const pixelEvents = await getTabData(Events.PIXEL_EVENTS, currentTabId);
-						const urlParams = new URLSearchParams(url.search);
-						let eventName = "library_loaded";
-						let visitorId = "";
+				const context: TrackerDetectionContext = {
+					url: data.url,
+					method: data.method || 'GET',
+					requestBody,
+					currentTabId
+				};
 
-						const parameters = Array.from(urlParams.entries())
-							.map(([key, value]) => {
-								if (key === "visitor_id") {
-									visitorId = value;
-								}
-								return { name: key, value };
-							})
-							.filter((param) => param.name !== "visitor_id");
-
-						const categorizedParams = categorizeParameters(
-							parameters,
-							pixelDictionary,
-						);
-
-						await setTabData(Events.PIXEL_EVENTS, currentTabId, [
-							...pixelEvents,
-							{
-								name: eventName,
-								parameters: categorizedParams,
-								id: visitorId,
-								url: data.url,
-							},
-						]);
-						await updateBadge();
+				// Special handling for GTM events in other tracker domains
+				if (requestBody && context.url.includes("doubleclick.net") || context.url.includes("googlesyndication.com")) {
+					try {
+						const parsedBody = JSON.parse(requestBody);
+						if (isGTMEvent(parsedBody)) {
+							// Force GTM detection for this request
+							context.url = "googletagmanager.com/gtm"; // Override URL pattern for GTM detection
+						}
+					} catch (error) {
+						// Not JSON, continue with normal processing
 					}
+				}
 
-					if (pathname.includes("/i/")) {
-						console.log("EventRich.AI /i/ endpoint detected:", data.url);
-						const pixelEvents = await getTabData(Events.PIXEL_EVENTS, currentTabId);
+				const wasProcessed = await TrackerDetector.processTracking(
+					context,
+					async (rule, extractedData) => {
+						// Get existing events for this tracker type
+						const existingEvents = await getTabData(rule.eventType, currentTabId);
 						
-						if (data.requestBody && data.requestBody.raw) {
-							const decoder = new TextDecoder("utf-8");
-							const requestBody = data.requestBody.raw[0]
-								? decoder.decode(data.requestBody.raw[0].bytes)
-								: null;
-
-							if (requestBody) {
-								try {
-									const parsedBody = JSON.parse(requestBody);
-									console.log("EventRich.AI request body:", parsedBody);
-									
-									// More robust check for EventRich.AI data
-									if (parsedBody.e || parsedBody.v || parsedBody.i || parsedBody.t || parsedBody.u || parsedBody.event || parsedBody.visitor_id) {
-										let eventName = parsedBody.e || parsedBody.event || "unknown_event";
-										let visitorId = parsedBody.i || parsedBody.visitor_id || "";
-
-										const flattenObject = flattenObjectFromTikTok(parsedBody);
-										
-										const parameters = Object.entries(flattenObject)
-											.map(([key, value]) => {
-												return { name: key, value: String(value) };
-											})
-											.filter((param) => param.name !== "i" && param.name !== "visitor_id");
-
-										const categorizedParams = categorizeParameters(
-											parameters,
-											pixelDictionary,
-										);
-
-										await setTabData(Events.PIXEL_EVENTS, currentTabId, [
-											...pixelEvents,
-											{
-												name: eventName,
-												parameters: categorizedParams,
-												id: visitorId,
-												url: data.url,
-											},
-										]);
-										await updateBadge();
-									}
-								} catch (error) {
-									console.error("Error parsing EventRich.AI tracking data:", error);
-								}
-							}
-						}
-					}
-				}
-				// Detect Google Analytics
-				else if (data.url.includes("google-analytics.com/g/collect")) {
-					const googleAnalyticsEvents = await getTabData(Events.GOOGLE_ANALYTICS_EVENTS, currentTabId);
-					const url = new URL(data.url);
-					const urlParams = new URLSearchParams(url.search);
-					let eventName = "";
-					let tid = "";
-
-					const parameters = Array.from(urlParams.entries()).map(
-						([key, value]) => {
-							if (key === "en") {
-								eventName = value;
-							} else if (key === "tid") {
-								tid = value;
-							}
-							return { name: key, value };
-						},
-					);
-
-					if (parameters.length > 0) {
+						// Categorize parameters using the rule's dictionary
 						const categorizedParams = categorizeParameters(
-							parameters,
-							gaDictionary,
+							extractedData.parameters,
+							rule.dictionary,
 						);
 
-						await setTabData(Events.GOOGLE_ANALYTICS_EVENTS, currentTabId, [
-							...googleAnalyticsEvents,
-							{
-								name: eventName || "page_view",
-								parameters: categorizedParams,
-								id: tid,
-								url: data.url,
-							},
-						]);
-						await updateBadge();
-					}
-				}
-				// Detect Google Tag Manager
-				else if (data.url.includes("googletagmanager.com/gtm") || data.url.includes("googletagmanager.com/gtag") || data.url.includes("googletagmanager.com/collect") || data.url.includes("googletagmanager.com") || data.url.includes("gtm") || data.url.includes("gtag")) {
-					const gtmEvents = await getTabData(Events.GOOGLE_TAG_MANAGER_EVENTS, currentTabId);
-					const url = new URL(data.url);
-					const urlParams = new URLSearchParams(url.search);
-					let eventName = "";
-					let gtmId = "";
-					let parameters: { name: string; value: string }[] = [];
-
-					// First, try to get parameters from URL
-					parameters = Array.from(urlParams.entries()).map(
-						([key, value]) => {
-							if (key === "en" || key === "event") {
-								eventName = value;
-							} else if (key === "gtm") {
-								gtmId = value;
-							} else if (key === "tid") {
-								gtmId = value;
-							}
-							return { name: key, value };
-						},
-					);
-
-					// If it's a POST request, also try to parse the request body
-					if (data.requestBody && data.requestBody.raw) {
-						const decoder = new TextDecoder("utf-8");
-						const requestBody = data.requestBody.raw[0]
-							? decoder.decode(data.requestBody.raw[0].bytes)
-							: null;
-
-						if (requestBody) {
-							try {
-								// Try to parse as JSON first
-								const parsedBody = JSON.parse(requestBody);
-								const flattenObject = flattenObjectFromTikTok(parsedBody);
-								
-								// Extract event name and GTM ID from JSON
-								if (parsedBody.event) {
-									eventName = parsedBody.event;
-								} else if (parsedBody.en) {
-									eventName = parsedBody.en;
-								}
-								
-								if (parsedBody.gtm) {
-									gtmId = parsedBody.gtm;
-								} else if (parsedBody.tid) {
-									gtmId = parsedBody.tid;
-								}
-
-								// Add JSON parameters to the existing URL parameters
-								const jsonParameters = Object.entries(flattenObject)
-									.map(([key, value]) => {
-										return { name: key, value: String(value) };
-									})
-									.filter((param) => param.name !== "gtm" && param.name !== "tid" && param.name !== "gtag");
-
-								parameters = [...parameters, ...jsonParameters];
-							} catch (error) {
-								// If JSON parsing fails, try to parse as form data
-								try {
-									const formData = new URLSearchParams(requestBody);
-									const formParameters = Array.from(formData.entries())
-										.map(([key, value]) => {
-											if (key === "en" || key === "event") {
-												eventName = value;
-											} else if (key === "gtm") {
-												gtmId = value;
-											} else if (key === "tid") {
-												gtmId = value;
-											}
-											return { name: key, value };
-										})
-										.filter((param) => param.name !== "gtm" && param.name !== "tid");
-
-									parameters = [...parameters, ...formParameters];
-								} catch (formError) {
-									console.error("Error parsing GTM tracking data:", formError);
-								}
-							}
+						// Special handling for EventRICH.AI /e/ endpoint
+						if (rule.name === "EventRICH.AI" && data.url.includes("/e/")) {
+							extractedData.eventName = "library_loaded";
 						}
-					}
 
-					if (parameters.length > 0 || eventName || gtmId) {
-						const categorizedParams = categorizeParameters(
-							parameters,
-							gtmDictionary,
-						);
+						// Create the new event
+						const newEvent = {
+							name: extractedData.eventName || getDefaultEventName(rule.name),
+							parameters: categorizedParams,
+							id: extractedData.trackerId || getDefaultTrackerId(rule.name, data.url),
+							url: data.url,
+							timestamp: new Date()
+						};
 
-						await setTabData(Events.GOOGLE_TAG_MANAGER_EVENTS, currentTabId, [
-							...gtmEvents,
-							{
-								name: eventName || "gtm_event",
-								parameters: categorizedParams,
-								id: gtmId,
-								url: data.url,
-							},
+						// Store the event
+						await setTabData(rule.eventType, currentTabId, [
+							...existingEvents,
+							newEvent
 						]);
+
+						// Update badge
 						await updateBadge();
+
+						console.log(`${rule.name} tracker detected:`, newEvent);
+					}
+				);
+
+				// Helper function to get default event names
+				function getDefaultEventName(trackerName: string): string {
+					switch (trackerName) {
+						case "Google Analytics": return "page_view";
+						case "Google Tag Manager": return "gtm_event";
+						case "Google Ads": return "conversion";
+						case "Meta/Facebook": return "page_view";
+						case "TikTok": return "page_view";
+						case "Other Trackers": return "tracking_event";
+						default: return "unknown_event";
 					}
 				}
-				// Detect Google Ads
-				else if (data.url.includes("googleadservices.com/pagead/conversion") || data.url.includes("googlesyndication.com/pagead/conversion")) {
-					const googleAdsEvents = await getTabData(Events.GOOGLE_ADS_EVENTS, currentTabId);
-					const url = new URL(data.url);
-					const urlParams = new URLSearchParams(url.search);
-					let eventName = "";
-					let conversionId = "";
 
-					const parameters = Array.from(urlParams.entries()).map(
-						([key, value]) => {
-							if (key === "event") {
-								eventName = value;
-							} else if (key === "id") {
-								conversionId = value;
-							}
-							return { name: key, value };
-						},
-					);
-
-					if (parameters.length > 0) {
-						const categorizedParams = categorizeParameters(
-							parameters,
-							gaDictionary, // Reuse GA dictionary for now
-						);
-
-						await setTabData(Events.GOOGLE_ADS_EVENTS, currentTabId, [
-							...googleAdsEvents,
-							{
-								name: eventName || "conversion",
-								parameters: categorizedParams,
-								id: conversionId,
-								url: data.url,
-							},
-						]);
-						await updateBadge();
-					}
-				}
-				// Detect Meta/Facebook
-				else if (data.url.includes("facebook.com/tr") || data.url.includes("fbevents.js") || data.url.includes("graph.facebook.com") || data.url.includes("connect.facebook.net")) {
-					const metaEvents = await getTabData(Events.META_EVENTS, currentTabId);
-					const url = new URL(data.url);
-					const urlParams = new URLSearchParams(url.search);
-					let eventName = "";
-					let pixelId = "";
-					let parameters: { name: string; value: string }[] = [];
-
-					// First, try to get parameters from URL
-					parameters = Array.from(urlParams.entries())
-						.map(([key, value]) => {
-							if (key === "ev") {
-								eventName = value;
-							} else if (key === "id") {
-								pixelId = value;
-							} else if (key === "event") {
-								eventName = value;
-							} else if (key === "pixel_id") {
-								pixelId = value;
-							}
-							return { name: key, value };
-						})
-						.filter((param) => param.name !== "id" && param.name !== "pixel_id");
-
-					// If it's a POST request, also try to parse the request body
-					if (data.method === "POST" && data.requestBody && data.requestBody.raw) {
-						const decoder = new TextDecoder("utf-8");
-						const requestBody = data.requestBody.raw[0]
-							? decoder.decode(data.requestBody.raw[0].bytes)
-							: null;
-
-						if (requestBody) {
-							try {
-								// Try to parse as JSON first
-								const parsedBody = JSON.parse(requestBody);
-								const flattenObject = flattenObjectFromTikTok(parsedBody);
-								
-								// Extract event name and pixel ID from JSON
-								if (parsedBody.event_name) {
-									eventName = parsedBody.event_name;
-								} else if (parsedBody.ev) {
-									eventName = parsedBody.ev;
-								} else if (parsedBody.event) {
-									eventName = parsedBody.event;
-								} else if (parsedBody.event_type) {
-									eventName = parsedBody.event_type;
-								}
-								
-								if (parsedBody.pixel_id) {
-									pixelId = parsedBody.pixel_id;
-								} else if (parsedBody.id) {
-									pixelId = parsedBody.id;
-								} else if (parsedBody.pixelId) {
-									pixelId = parsedBody.pixelId;
-								}
-
-								// Add JSON parameters to the existing URL parameters
-								const jsonParameters = Object.entries(flattenObject)
-									.map(([key, value]) => {
-										return { name: key, value: String(value) };
-									})
-									.filter((param) => param.name !== "id" && param.name !== "pixel_id" && param.name !== "pixelId");
-
-								parameters = [...parameters, ...jsonParameters];
-							} catch (error) {
-								// If JSON parsing fails, try to parse as form data
-								try {
-									const formData = new URLSearchParams(requestBody);
-									const formParameters = Array.from(formData.entries())
-										.map(([key, value]) => {
-											if (key === "ev") {
-												eventName = value;
-											} else if (key === "id") {
-												pixelId = value;
-											} else if (key === "event") {
-												eventName = value;
-											} else if (key === "pixel_id") {
-												pixelId = value;
-											}
-											return { name: key, value };
-										})
-										.filter((param) => param.name !== "id" && param.name !== "pixel_id");
-
-									parameters = [...parameters, ...formParameters];
-								} catch (formError) {
-									console.error("Error parsing Facebook tracking data:", formError);
-								}
-							}
-						}
-					}
-
-					if (parameters.length > 0 || eventName || pixelId) {
-						const categorizedParams = categorizeParameters(
-							parameters,
-							metaDictionary,
-						);
-
-						await setTabData(Events.META_EVENTS, currentTabId, [
-							...metaEvents,
-							{
-								name: eventName || "page_view",
-								parameters: categorizedParams,
-								id: pixelId,
-								url: data.url,
-							},
-						]);
-						await updateBadge();
-					}
-				}
-				// Detect TikTok
-				else if (data.url.includes("analytics.tiktok.com/api/v2/pixel")) {
-					const tiktokEvents = await getTabData(Events.TIKTOK_EVENTS, currentTabId);
-					
-					if (data.requestBody && data.requestBody.raw) {
-						const decoder = new TextDecoder("utf-8");
-						const requestBody = data.requestBody.raw[0]
-							? decoder.decode(data.requestBody.raw[0].bytes)
-							: null;
-
-						if (requestBody) {
-							try {
-								const parsedBody = JSON.parse(requestBody);
-								const flattenObject = flattenObjectFromTikTok(parsedBody);
-								let eventName = "";
-								let pixelCode = "";
-
-								const parameters = Object.entries(flattenObject)
-									.map(([key, value]) => {
-										if (key === "event") {
-											eventName = value;
-										} else if (key === "context_pixel_code") {
-											pixelCode = value;
-										}
-										return { name: key, value: String(value) };
-									})
-									.filter((param) => param.name !== "context_pixel_code");
-
-								const categorizedParams = categorizeParameters(
-									parameters,
-									tiktokDictionary,
-								);
-
-								await setTabData(Events.TIKTOK_EVENTS, currentTabId, [
-									...tiktokEvents,
-									{
-										name: eventName || "page_view",
-										parameters: categorizedParams,
-										id: pixelCode,
-										url: data.url,
-									},
-								]);
-								await updateBadge();
-							} catch (error) {
-								console.error("Error parsing TikTok tracking data:", error);
-							}
-						}
-					}
-				}
-				// Detect other trackers
-				else if (data.url.includes("doubleclick.net") || data.url.includes("googlesyndication.com") || data.url.includes("amazon-adsystem.com") || data.url.includes("bing.com/msads")) {
-					const otherTrackersEvents = await getTabData(Events.OTHER_TRACKERS_EVENTS, currentTabId);
-					const url = new URL(data.url);
-					const urlParams = new URLSearchParams(url.search);
-					
-					let parameters: { name: string; value: string }[] = [];
-					let isGTMEvent = false;
-					let gtmId = "";
-					let eventName = "";
-
-					// Check if this might be a GTM event by looking for GTM-specific parameters
-					if (data.requestBody && data.requestBody.raw) {
-						const decoder = new TextDecoder("utf-8");
-						const requestBody = data.requestBody.raw[0]
-							? decoder.decode(data.requestBody.raw[0].bytes)
-							: null;
-
-						if (requestBody) {
-							try {
-								const parsedBody = JSON.parse(requestBody);
-								// Check for GTM-specific fields - expanded check
-								if (parsedBody.gtm || parsedBody.gtag || parsedBody.tag_exp || parsedBody.guid === "ON" || parsedBody._tu === "JA" || parsedBody.pscdl === "noapi") {
-									isGTMEvent = true;
-									gtmId = parsedBody.gtm || parsedBody.gtag || "";
-									if (parsedBody.event) {
-										eventName = parsedBody.event;
-									} else if (parsedBody.en) {
-										eventName = parsedBody.en;
-									}
-									
-									console.log("GTM event detected in other trackers:", parsedBody);
-									
-									// This is a GTM event, handle it in GTM detection
-									const gtmEvents = await getTabData(Events.GOOGLE_TAG_MANAGER_EVENTS, currentTabId);
-									const flattenObject = flattenObjectFromTikTok(parsedBody);
-									
-									const gtmParameters = Object.entries(flattenObject)
-										.map(([key, value]) => {
-											return { name: key, value: String(value) };
-										})
-										.filter((param) => param.name !== "gtm" && param.name !== "tid" && param.name !== "gtag");
-
-									const categorizedParams = categorizeParameters(
-										gtmParameters,
-										gtmDictionary,
-									);
-
-									await setTabData(Events.GOOGLE_TAG_MANAGER_EVENTS, currentTabId, [
-										...gtmEvents,
-										{
-											name: eventName || "gtm_event",
-											parameters: categorizedParams,
-											id: gtmId,
-											url: data.url,
-										},
-									]);
-									await updateBadge();
-									return;
-								}
-							} catch (error) {
-								// Not JSON, continue with normal processing
-							}
-						}
-					}
-
-					// If not a GTM event, process as other tracker
-					parameters = Array.from(urlParams.entries()).map(
-						([key, value]) => ({ name: key, value })
-					);
-
-					if (parameters.length > 0) {
-						const categorizedParams = categorizeParameters(
-							parameters,
-							pixelDictionary, // Reuse pixel dictionary for other trackers
-						);
-
-						await setTabData(Events.OTHER_TRACKERS_EVENTS, currentTabId, [
-							...otherTrackersEvents,
-							{
-								name: "tracking_event",
-								parameters: categorizedParams,
-								id: url.hostname,
-								url: data.url,
-							},
-						]);
-						await updateBadge();
+				// Helper function to get default tracker IDs
+				function getDefaultTrackerId(trackerName: string, url: string): string {
+					switch (trackerName) {
+						case "Google Analytics": return "tid";
+						case "Google Tag Manager": return "gtm_id";
+						case "Google Ads": return "conversion_id";
+						case "Meta/Facebook": return "pixel_id";
+						case "TikTok": return "pixel_code";
+						case "Other Trackers": return new URL(url).hostname;
+						default: return "tracker_id";
 					}
 				}
 				
