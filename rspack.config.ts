@@ -14,6 +14,9 @@ export default defineConfig({
 		path: path.resolve(__dirname, "dist"),
 		filename: "[name].js",
 		chunkLoadingGlobal: "webpackChunkEventRichAI", // Custom global to avoid conflicts
+		library: {
+			type: "umd", // Universal Module Definition for better compatibility
+		},
 	},
 	performance: {
 		hints: false, // Disable performance warnings for Chrome extension
