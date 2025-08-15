@@ -1,8 +1,12 @@
+console.log('EventRICH.AI: popup.js bundle starting to execute...');
+
 import { createRoot } from "react-dom/client";
 import "./styles/global.css";
 import Popup from "./components/Popup";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeManager, ErrorHandler, AuditLogger } from "./utils";
+
+console.log('EventRICH.AI: popup.js imports completed...');
 
 // Initialize theme and utilities before mounting
 const initialize = async () => {
