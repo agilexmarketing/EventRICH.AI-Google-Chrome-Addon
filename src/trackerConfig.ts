@@ -38,11 +38,16 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 	{
 		name: "Google Analytics",
 		eventType: Events.GOOGLE_ANALYTICS_EVENTS,
-		urlPatterns: ["google-analytics.com/g/collect"],
+		urlPatterns: [
+			"google-analytics.com/g/collect",
+			"google-analytics.com/collect",
+			"analytics.google.com",
+			"ssl.google-analytics.com"
+		],
 		description: "Google Analytics 4 (GA4) tracking detection",
 		extractors: {
-			eventName: ["en"],
-			trackerId: ["tid"]
+			eventName: ["en", "t"],
+			trackerId: ["tid", "tracking_id"]
 		},
 		dictionary: gaDictionary,
 		supportsRequestBody: false,
@@ -484,13 +489,466 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		requestBodyParsers: ["json"]
 	},
 	{
+		name: "Snapchat Pixel",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"tr.snapchat.com",
+			"sc-static.net",
+			"snapchat.com/tr"
+		],
+		description: "Snapchat Ads conversion tracking",
+		extractors: {
+			eventName: ["event", "et"],
+			trackerId: ["pixel_id", "u"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "LinkedIn Insight Tag",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"linkedin.com/li/track",
+			"snap.licdn.com",
+			"www.linkedin.com/psettings/guest-controls/retargeting-opt-out"
+		],
+		description: "LinkedIn Ads conversion tracking",
+		extractors: {
+			eventName: ["event", "conversionType"],
+			trackerId: ["partnerId", "conversionId"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Reddit Pixel",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"rdt.li",
+			"redditstatic.com",
+			"reddit.com/api/v2/pixel"
+		],
+		description: "Reddit Ads conversion tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["advertiser_id", "pixel_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Google Optimize",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"optimize.google.com",
+			"googleoptimize.com",
+			"gtm/optimize"
+		],
+		description: "Google Optimize A/B testing platform",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["container_id", "experiment_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Segment",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"api.segment.io",
+			"cdn.segment.com",
+			"segment.com/v1"
+		],
+		description: "Segment customer data platform",
+		extractors: {
+			eventName: ["event", "type"],
+			trackerId: ["writeKey", "userId"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Mixpanel",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"api.mixpanel.com",
+			"cdn.mxpnl.com",
+			"mixpanel.com/track"
+		],
+		description: "Mixpanel product analytics",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["token", "distinct_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Heap Analytics",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"heapanalytics.com",
+			"cdn.heapanalytics.com"
+		],
+		description: "Heap digital insights platform",
+		extractors: {
+			eventName: ["event", "k"],
+			trackerId: ["h", "app_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Adobe Analytics",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"adobe.com/b/ss",
+			"omtrdc.net",
+			"2o7.net",
+			"demdex.net"
+		],
+		description: "Adobe Analytics (formerly Omniture)",
+		extractors: {
+			eventName: ["events", "pe"],
+			trackerId: ["rsid", "vid"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Bing Ads",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"bat.bing.com",
+			"bing.com/msads",
+			"microsoft.com/msads"
+		],
+		description: "Microsoft Bing Ads conversion tracking",
+		extractors: {
+			eventName: ["event", "ea"],
+			trackerId: ["ti", "tag_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Intercom",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"api.intercom.io",
+			"js.intercomcdn.com",
+			"intercom.com/track"
+		],
+		description: "Intercom customer messaging platform",
+		extractors: {
+			eventName: ["event_name", "type"],
+			trackerId: ["app_id", "user_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Drift",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"driftt.com",
+			"js.driftt.com",
+			"api.drift.com"
+		],
+		description: "Drift conversational marketing platform",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["org_id", "end_user_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Zendesk Chat",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"zopim.com",
+			"v2.zopim.com",
+			"zendesk.com/api"
+		],
+		description: "Zendesk Chat customer support",
+		extractors: {
+			eventName: ["type", "event"],
+			trackerId: ["account_key", "session_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Mailchimp",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"mailchimp.com/track",
+			"chimpstatic.com",
+			"list-manage.com"
+		],
+		description: "Mailchimp email marketing analytics",
+		extractors: {
+			eventName: ["goal", "event"],
+			trackerId: ["u", "id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "HubSpot",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"hs-analytics.net",
+			"hubspot.com/api",
+			"hs-scripts.com"
+		],
+		description: "HubSpot marketing automation",
+		extractors: {
+			eventName: ["_n", "event"],
+			trackerId: ["portalId", "utk"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Pardot",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"pardot.com",
+			"pi.pardot.com"
+		],
+		description: "Salesforce Pardot B2B marketing automation",
+		extractors: {
+			eventName: ["event", "activity"],
+			trackerId: ["account_id", "visitor_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Marketo",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"marketo.net",
+			"mktoresp.com",
+			"marketo.com/api"
+		],
+		description: "Adobe Marketo marketing automation",
+		extractors: {
+			eventName: ["event", "activity_type"],
+			trackerId: ["leadId", "munchkinId"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Salesforce DMP",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"krxd.net",
+			"salesforce.com/audience",
+			"sfmc.co"
+		],
+		description: "Salesforce Data Management Platform",
+		extractors: {
+			eventName: ["event", "type"],
+			trackerId: ["site_id", "user_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Eloqua",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"eloqua.com",
+			"elqtrk.com",
+			"oracle.com/cx/marketing"
+		],
+		description: "Oracle Eloqua marketing automation",
+		extractors: {
+			eventName: ["event", "pps"],
+			trackerId: ["siteId", "visitorId"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Crazy Egg",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"crazyegg.com",
+			"script.crazyegg.com"
+		],
+		description: "Crazy Egg heatmap and A/B testing",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["CE_SNAPSHOT_NAME", "account_number"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Lucky Orange",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"luckyorange.com",
+			"luckyorange.net"
+		],
+		description: "Lucky Orange session recording and analytics",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["site_id", "session_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "FullStory",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"fullstory.com",
+			"fs.org"
+		],
+		description: "FullStory digital experience platform",
+		extractors: {
+			eventName: ["event", "eventName"],
+			trackerId: ["org", "uid"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "LogRocket",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"logrocket.io",
+			"lr-ingest.com"
+		],
+		description: "LogRocket session replay and monitoring",
+		extractors: {
+			eventName: ["event", "type"],
+			trackerId: ["appID", "sessionID"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Smartlook",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"smartlook.com",
+			"smartlook.cloud"
+		],
+		description: "Smartlook visitor recordings and analytics",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["key", "project_key"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Mouseflow",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"mouseflow.com",
+			"cdn-test.mouseflow.com"
+		],
+		description: "Mouseflow session replay and heatmaps",
+		extractors: {
+			eventName: ["event"],
+			trackerId: ["website_id", "session_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json"]
+	},
+	{
+		name: "Yandex Metrica",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"mc.yandex.ru",
+			"metrica.yandex.com"
+		],
+		description: "Yandex Metrica web analytics",
+		extractors: {
+			eventName: ["page-url", "event"],
+			trackerId: ["browser-info", "counter-id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Baidu Analytics",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"hm.baidu.com",
+			"tongji.baidu.com"
+		],
+		description: "Baidu web analytics",
+		extractors: {
+			eventName: ["et", "event"],
+			trackerId: ["si", "site_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Naver Analytics",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"wcs.naver.net",
+			"naver.com/wcslog"
+		],
+		description: "Naver web analytics (South Korea)",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["m", "wlog_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
 		name: "Other Trackers",
 		eventType: Events.OTHER_TRACKERS_EVENTS,
 		urlPatterns: [
 			"doubleclick.net",
 			"googlesyndication.com", 
 			"amazon-adsystem.com",
-			"bing.com/msads"
+			"bing.com/msads",
+			"googleadservices.com",
+			"googletagservices.com",
+			"google.com/pagead",
+			"adsystem.amazon-adsystem.com"
 		],
 		description: "Generic detection for other advertising and tracking services",
 		extractors: {
