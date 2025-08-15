@@ -10,6 +10,25 @@ export enum Events {
 
 export const CURRENT_URL = "currentUrl";
 
+export enum ThemeMode {
+	LIGHT = "light",
+	DARK = "dark",
+	SYSTEM = "system"
+}
+
+export enum ExportFormat {
+	JSON = "json",
+	CSV = "csv",
+	TXT = "txt"
+}
+
+export enum NotificationType {
+	SUCCESS = "success",
+	ERROR = "error",
+	WARNING = "warning",
+	INFO = "info"
+}
+
 export interface SygnalDataEventCategoryParameter {
 	name: string;
 	value: string;
