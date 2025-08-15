@@ -1,4 +1,4 @@
-import { Eye, Settings, Search, BarChart3, Code, Copy, Check } from "lucide-react";
+import { Eye, Settings, Search, BarChart3, Code, Copy, Check, FileText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { 
 	CURRENT_URL, 
@@ -88,6 +88,11 @@ export default function Popup() {
 	const [showFilters, setShowFilters] = useState(false);
 	const [showDebugPanel, setShowDebugPanel] = useState(false);
 	const [debugDataCopied, setDebugDataCopied] = useState(false);
+	const [showScriptExtractor, setShowScriptExtractor] = useState(false);
+	const [extractedScripts, setExtractedScripts] = useState<{ source: string; content: string; type: string }[]>([]);
+	const [scriptsLoading, setScriptsLoading] = useState(false);
+	const [selectedScript, setSelectedScript] = useState<string>("");
+	const [scriptsCopied, setScriptsCopied] = useState(false);
 
 
 
@@ -431,6 +436,162 @@ export default function Popup() {
 		}
 	};
 
+	// Script extraction functionality
+	const extractScriptsFromPage = async () => {
+		try {
+			setScriptsLoading(true);
+			setExtractedScripts([]);
+			
+			const currentTabId = await getCurrentTabId();
+			if (!currentTabId) {
+				NotificationManager.error('Error', 'Could not get current tab');
+				return;
+			}
+
+			// Inject script to extract all scripts from page and iframes
+			const results = await chrome.scripting.executeScript({
+				target: { tabId: currentTabId },
+				func: () => {
+					const scripts: { source: string; content: string; type: string }[] = [];
+					
+					// Helper function to extract scripts from a document
+					const extractFromDocument = (doc: Document, source: string) => {
+						const scriptElements = doc.querySelectorAll('script');
+						scriptElements.forEach((script, index) => {
+							let content = '';
+							let type = 'inline';
+							let scriptSource = `${source} - Script ${index + 1}`;
+							
+							if (script.src) {
+								// External script
+								type = 'external';
+								content = `// External script source: ${script.src}\n// Cannot access content due to CORS restrictions`;
+								scriptSource = script.src;
+							} else if (script.textContent) {
+								// Inline script
+								content = script.textContent.trim();
+								type = 'inline';
+							}
+							
+							if (content) {
+								scripts.push({
+									source: scriptSource,
+									content,
+									type
+								});
+							}
+						});
+					};
+
+					// Extract from main document
+					extractFromDocument(document, 'Main Page');
+					
+					// Extract from iframes (if accessible)
+					const iframes = document.querySelectorAll('iframe');
+					iframes.forEach((iframe, iframeIndex) => {
+						try {
+							if (iframe.contentDocument) {
+								extractFromDocument(
+									iframe.contentDocument, 
+									`Iframe ${iframeIndex + 1} (${iframe.src || 'same-origin'})`
+								);
+							}
+						} catch (error) {
+							// iframe not accessible due to CORS
+							scripts.push({
+								source: `Iframe ${iframeIndex + 1} (${iframe.src || 'cross-origin'})`,
+								content: `// Cannot access iframe content due to CORS restrictions\n// iframe src: ${iframe.src || 'no src attribute'}`,
+								type: 'iframe-blocked'
+							});
+						}
+					});
+
+					return scripts;
+				}
+			});
+
+			if (results && results[0] && results[0].result) {
+				const scripts = results[0].result;
+				setExtractedScripts(scripts);
+				
+				NotificationManager.success(
+					'Scripts Extracted', 
+					`Found ${scripts.length} scripts on the page`
+				);
+				
+				AuditLogger.log('scripts_extracted', { 
+					scriptCount: scripts.length,
+					url: currentUrl 
+				});
+			}
+		} catch (error) {
+			console.error('Failed to extract scripts:', error);
+			NotificationManager.error('Extraction Failed', 'Could not extract scripts from the page');
+			ErrorHandler.logError(error as Error, 'Script extraction');
+		} finally {
+			setScriptsLoading(false);
+		}
+	};
+
+	const handleCopySelectedScript = async () => {
+		if (!selectedScript) {
+			NotificationManager.warning('No Selection', 'Please select a script to copy');
+			return;
+		}
+
+		try {
+			const script = extractedScripts.find(s => s.source === selectedScript);
+			if (script) {
+				const copyContent = `// Script Source: ${script.source}\n// Type: ${script.type}\n// Extracted by EventRICH.AI Chrome Extension\n\n${script.content}`;
+				await navigator.clipboard.writeText(copyContent);
+				setScriptsCopied(true);
+				setTimeout(() => setScriptsCopied(false), 2000);
+				
+				NotificationManager.success('Copied!', 'Script content copied to clipboard');
+			}
+		} catch (error) {
+			console.error('Failed to copy script:', error);
+			NotificationManager.error('Copy Failed', 'Could not copy script to clipboard');
+		}
+	};
+
+	const handleCopyAllScripts = async () => {
+		if (extractedScripts.length === 0) {
+			NotificationManager.warning('No Scripts', 'No scripts available to copy');
+			return;
+		}
+
+		try {
+			const allScriptsContent = extractedScripts.map((script, index) => 
+				`// ========== SCRIPT ${index + 1} ==========\n` +
+				`// Source: ${script.source}\n` +
+				`// Type: ${script.type}\n` +
+				`// Extracted by EventRICH.AI Chrome Extension\n\n` +
+				`${script.content}\n\n`
+			).join('\n');
+
+			const finalContent = `// ALL SCRIPTS EXTRACTED FROM: ${currentUrl}\n` +
+				`// Extraction Date: ${new Date().toISOString()}\n` +
+				`// Total Scripts: ${extractedScripts.length}\n` +
+				`// Generated by EventRICH.AI Chrome Extension for AI Analysis\n\n` +
+				allScriptsContent;
+
+			await navigator.clipboard.writeText(finalContent);
+			setScriptsCopied(true);
+			setTimeout(() => setScriptsCopied(false), 2000);
+			
+			NotificationManager.success('All Scripts Copied!', `${extractedScripts.length} scripts copied for AI analysis`);
+			
+			AuditLogger.log('all_scripts_copied', { 
+				scriptCount: extractedScripts.length,
+				url: currentUrl 
+			});
+		} catch (error) {
+			console.error('Failed to copy all scripts:', error);
+			NotificationManager.error('Copy Failed', 'Could not copy scripts to clipboard');
+		}
+	};
+
 	// Keyboard shortcuts
 	useEffect(() => {
 		if (!settings.keyboardShortcuts) return;
@@ -543,6 +704,20 @@ export default function Popup() {
 							>
 								<Code className="h-4 w-4" />
 							</button>
+							<button
+								onClick={() => setShowScriptExtractor(!showScriptExtractor)}
+								className={`
+									flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-all duration-200
+									border border-gray-200 dark:border-gray-600
+									${showScriptExtractor 
+										? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600' 
+										: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400'
+									}
+								`}
+								title="Extract Page Scripts for AI Analysis"
+							>
+								<FileText className="h-4 w-4" />
+							</button>
 						</div>
 					</div>
 				</div>
@@ -625,6 +800,117 @@ export default function Popup() {
 						</div>
 						<div className="mt-2 text-xs text-purple-600 dark:text-purple-400">
 							This contains all detected trackers, their events, and parameters for debugging purposes.
+						</div>
+					</div>
+				)}
+
+				{/* Script Extractor Panel */}
+				{showScriptExtractor && (
+					<div className="mx-3 mb-3 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+						<div className="flex items-center justify-between mb-3">
+							<div className="flex items-center gap-2">
+								<FileText className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+								<h3 className="text-sm font-semibold text-orange-900 dark:text-orange-100">
+									Page Script Extractor
+								</h3>
+							</div>
+							<div className="flex items-center gap-2">
+								{extractedScripts.length > 0 && (
+									<button
+										onClick={handleCopyAllScripts}
+										className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60 rounded transition-colors"
+									>
+										{scriptsCopied ? (
+											<>
+												<Check className="h-3 w-3" />
+												Copied!
+											</>
+										) : (
+											<>
+												<Copy className="h-3 w-3" />
+												Copy All
+											</>
+										)}
+									</button>
+								)}
+								<button
+									onClick={extractScriptsFromPage}
+									disabled={scriptsLoading}
+									className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-600 dark:bg-orange-700 text-white hover:bg-orange-700 dark:hover:bg-orange-600 rounded transition-colors disabled:opacity-50"
+								>
+									{scriptsLoading ? (
+										<>
+											<div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+											Extracting...
+										</>
+									) : (
+										<>
+											<FileText className="h-3 w-3" />
+											Extract Scripts
+										</>
+									)}
+								</button>
+							</div>
+						</div>
+						
+						{extractedScripts.length > 0 && (
+							<>
+								<div className="mb-3">
+									<label className="block text-xs font-medium text-orange-800 dark:text-orange-200 mb-1">
+										Select script to copy ({extractedScripts.length} found):
+									</label>
+									<select
+										value={selectedScript}
+										onChange={(e) => setSelectedScript(e.target.value)}
+										className="w-full text-xs p-2 border border-orange-200 dark:border-orange-700 rounded bg-white dark:bg-orange-950/40 text-orange-900 dark:text-orange-100"
+									>
+										<option value="">Choose a script...</option>
+										{extractedScripts.map((script, index) => (
+											<option key={index} value={script.source}>
+												{script.type === 'external' ? '🔗' : script.type === 'iframe-blocked' ? '🚫' : '📄'} {script.source}
+											</option>
+										))}
+									</select>
+								</div>
+								
+								{selectedScript && (
+									<div className="mb-3">
+										<div className="flex items-center justify-between mb-2">
+											<span className="text-xs font-medium text-orange-800 dark:text-orange-200">
+												Script Preview:
+											</span>
+											<button
+												onClick={handleCopySelectedScript}
+												className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60 rounded transition-colors"
+											>
+												{scriptsCopied ? (
+													<>
+														<Check className="h-3 w-3" />
+														Copied!
+													</>
+												) : (
+													<>
+														<Copy className="h-3 w-3" />
+														Copy Selected
+													</>
+												)}
+											</button>
+										</div>
+										<div className="max-h-48 overflow-y-auto">
+											<pre className="text-xs text-orange-800 dark:text-orange-200 whitespace-pre-wrap break-words bg-white dark:bg-orange-950/40 p-2 rounded border border-orange-200 dark:border-orange-700">
+												{extractedScripts.find(s => s.source === selectedScript)?.content || ''}
+											</pre>
+										</div>
+									</div>
+								)}
+							</>
+						)}
+						
+						<div className="text-xs text-orange-600 dark:text-orange-400">
+							Extract all scripts from the current page and iframes for AI analysis to improve tracker detection.
+							{extractedScripts.length > 0 && (
+								<> Found {extractedScripts.filter(s => s.type === 'inline').length} inline, {extractedScripts.filter(s => s.type === 'external').length} external scripts.</>
+							)}
 						</div>
 					</div>
 				)}
