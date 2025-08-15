@@ -977,6 +977,257 @@ export const TRACKER_DETECTION_RULES: TrackerDetectionRule[] = [
 		dictionary: [],
 		supportsRequestBody: true,
 		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Smile.io",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"js.smile.io",
+			"smile-shopify.js",
+			"smile-lite",
+			"smile-loader.js"
+		],
+		description: "Smile.io loyalty and rewards platform tracking",
+		extractors: {
+			eventName: ["action", "event"],
+			trackerId: ["shop", "customer_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Gorgias",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"config.gorgias.chat",
+			"gorgias-chat-bundle.js",
+			"shopify-checkout-chat-storage-sync"
+		],
+		description: "Gorgias customer service and helpdesk tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["appKey", "customer_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "RevenuHunt",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"admin.revenuehunt.com/embed.js",
+			"revenuehunt.com"
+		],
+		description: "RevenueHunt product recommendation quiz tracking",
+		extractors: {
+			eventName: ["quiz", "event"],
+			trackerId: ["shop", "quiz_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "SMSBump",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"d18eg7dreypte5.cloudfront.net",
+			"smsbump_timer.js",
+			"browse-abandonment"
+		],
+		description: "SMSBump SMS marketing and cart abandonment tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["shop", "customer_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Recharge",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"static.rechargecdn.com",
+			"widget.min.js",
+			"recharge"
+		],
+		description: "Recharge subscription management platform tracking",
+		extractors: {
+			eventName: ["action", "event"],
+			trackerId: ["shop", "customer_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "ReturnGO",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"static.returngo.ai",
+			"returngo.min.js"
+		],
+		description: "ReturnGO returns and exchanges management tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["shop", "return_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "UpPromote",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"d1639lhkj5l89m.cloudfront.net",
+			"uppromote.js"
+		],
+		description: "UpPromote affiliate marketing platform tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["shop", "affiliate_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Judge.me",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"cdnwidget.judge.me",
+			"api.judge.me",
+			"jdgm",
+			"judge.me"
+		],
+		description: "Judge.me product reviews and ratings tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["shop", "review_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Zipify",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"zipify.com",
+			"ZipifyPages",
+			"zipify-analytics"
+		],
+		description: "Zipify landing page and funnel analytics tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["page_id", "funnel_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "HeyCarson Slide Cart",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"hs-slide-cart",
+			"HSSLIDECART",
+			"slidecartapp.heysenior.com"
+		],
+		description: "HeyCarson slide cart drawer tracking",
+		extractors: {
+			eventName: ["action", "event"],
+			trackerId: ["shop", "cart_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Intelligems",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"cdn.intelligems.io",
+			"intelligems"
+		],
+		description: "Intelligems A/B testing and price optimization tracking",
+		extractors: {
+			eventName: ["test", "variant"],
+			trackerId: ["test_id", "user_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Alia",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"backend.alia-cloudflare.com",
+			"alia:signup"
+		],
+		description: "Alia customer engagement and popup tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["shop", "customer_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "NewsBreak Pixel",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"static.newsbreak.com",
+			"nbpixel.js",
+			"id-msp.newsbreak.com"
+		],
+		description: "NewsBreak advertising pixel tracking",
+		extractors: {
+			eventName: ["event", "pageload"],
+			trackerId: ["ID-", "advertiser_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "AdBiq",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"secure.adnxs.com",
+			"AdBIQTrackerApp",
+			"clickid"
+		],
+		description: "AdBiq advertising and attribution tracking",
+		extractors: {
+			eventName: ["event", "action"],
+			trackerId: ["clickid", "click_id"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
+	},
+	{
+		name: "Aggle",
+		eventType: Events.OTHER_TRACKERS_EVENTS,
+		urlPatterns: [
+			"cdn.aggle.net",
+			"oir.min.js"
+		],
+		description: "Aggle marketing attribution and tracking",
+		extractors: {
+			eventName: ["on-site", "event"],
+			trackerId: ["oirid", "P65M7C5MN"]
+		},
+		dictionary: [],
+		supportsRequestBody: true,
+		requestBodyParsers: ["json", "form"]
 	}
 ];
 
