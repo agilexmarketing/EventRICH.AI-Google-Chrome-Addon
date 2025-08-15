@@ -64,16 +64,18 @@ export default function DataItemAccordion({
 							{accordionDataName}
 						</span>
 					</div>
-					<button
-						onClick={(e) => {
-							e.stopPropagation();
-							setShowRawData(!showRawData);
-						}}
-						className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-					>
-						<Code className="w-3 h-3" />
-						{showRawData ? "Hide Raw" : "View Raw"}
-					</button>
+					{active && (
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setShowRawData(!showRawData);
+							}}
+							className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+						>
+							<Code className="w-3 h-3" />
+							{showRawData ? "Hide Raw" : "View Raw"}
+						</button>
+					)}
 				</div>
 			</div>
 			{active && (
